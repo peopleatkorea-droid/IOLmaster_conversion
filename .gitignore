@@ -1,0 +1,16 @@
+# Build outputs
+build/
+dist/
+*.spec
+
+# Python cache and local environments
+__pycache__/
+*.py[cod]
+.venv/
+
+# Local logs
+IOLMasterParser_error.txt
+
+# Sample exports may contain patient identifiers
+sample_*.csv
+sample_*.xlsx

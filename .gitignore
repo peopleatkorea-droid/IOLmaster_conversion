@@ -8,6 +8,7 @@ dist/
 __pycache__/
 *.py[cod]
 .venv/
+.env*.local
 
 # Local logs
 IOLMasterParser_error.txt

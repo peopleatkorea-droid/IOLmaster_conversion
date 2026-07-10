@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Keep clinical source files and presentation/manuscript artifacts out of commits.
-blocked_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -Ei '(^|/)(outputs|reports/figures|presentations|slides|manuscript/figures)/|[.](csv|xls|xlsx|pdf|ppt|pptx|doc|docx|png)$' || true)
+blocked_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -Ei '(^|/)(outputs|reports/figures|presentations|slides|manuscript/figures)/|(^|/)[.]env[^/]*[.]local$|[.](csv|xls|xlsx|pdf|ppt|pptx|doc|docx|png)$' || true)
 
 if [ -n "$blocked_files" ]; then
     echo "Commit blocked: staged clinical data or presentation/manuscript artifacts were found."

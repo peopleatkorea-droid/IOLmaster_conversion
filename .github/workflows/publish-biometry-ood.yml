@@ -1,0 +1,80 @@
+name: Publish Biometry OOD Explorer
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Immutable release version (for example v3.1.1)"
+        required: true
+        type: string
+      promote:
+        description: "Promote this release to the public K-ERA tool path"
+        required: true
+        default: false
+        type: boolean
+  push:
+    tags:
+      - "biometry-ood-v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: biometry-ood-r2-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Resolve release settings
+        id: release
+        shell: pwsh
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_PROMOTE: ${{ inputs.promote }}
+        run: |
+          if ($env:GITHUB_REF_TYPE -eq "tag") {
+            $version = $env:GITHUB_REF_NAME -replace '^biometry-ood-', ''
+            $promote = "true"
+          } else {
+            $version = $env:INPUT_VERSION
+            $promote = if ($env:INPUT_PROMOTE -eq "true") { "true" } else { "false" }
+          }
+          if ($version -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$') {
+            throw "Invalid release version: $version"
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "promote=$promote" >> $env:GITHUB_OUTPUT
+
+      - name: Build, verify, and publish immutable release
+        shell: pwsh
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_PUBLIC_BASE_URL: ${{ vars.R2_PUBLIC_BASE_URL }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+          RELEASE_PROMOTE: ${{ steps.release.outputs.promote }}
+        run: |
+          $arguments = @("-Version", $env:RELEASE_VERSION)
+          if ($env:RELEASE_PROMOTE -eq "true") { $arguments += "-Promote" }
+          ./deployment/publish_r2.ps1 @arguments
+
+      - name: Preserve release manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: biometry-ood-${{ steps.release.outputs.version }}-manifest
+          path: dist/r2-publish/releases/${{ steps.release.outputs.version }}/manifest.json
+          if-no-files-found: error

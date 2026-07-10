@@ -262,6 +262,48 @@ py -3 deployment\build_static_site.py
 
 배포 대상은 `dist\web-static` 폴더 하나뿐입니다. 허용된 파일은 `web/index.html`, `web/styles.css`, `web/app.js`, `web/ood-core.js`, `web/demo-examples.js`, `models/biometry_ood_bilateral_v31.json`과 루트 이동용 `index.html`입니다. 출력 폴더에 그 밖의 파일이 있으면 빌드를 중단하므로 원본 Excel/PDF, Python source, 검증 보고서와 발표 산출물이 섞이지 않습니다.
 
+### K-ERA R2 버전 배포
+
+K-ERA 홈페이지의 고정 주소 `/tools/biometry-ood`는 저장소 파일을 복사하지 않고 `releases.k-era.org`의 버전별 정적 release를 프록시합니다. 게시 전 전체 테스트와 실제 R2 object 목록을 확인하는 dry-run은 credential 없이 실행할 수 있습니다.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File deployment\publish_r2.ps1 `
+  -Version v3.1.0-preview `
+  -DryRun `
+  -Promote
+```
+
+실제 게시에는 저장소 루트의 ignored `.env.r2.local` 또는 명시적으로 지정한 env 파일을 사용합니다.
+
+```dotenv
+R2_ACCOUNT_ID="..."
+R2_BUCKET="k-era-releases"
+R2_PUBLIC_BASE_URL="https://releases.k-era.org"
+R2_ACCESS_KEY_ID="..."
+R2_SECRET_ACCESS_KEY="..."
+R2_BIOMETRY_OOD_PREFIX="biometry-ood"
+```
+
+먼저 versioned release만 게시하고 검토하려면 `-Promote`를 생략합니다. 검증과 공개 승격을 한 번에 수행하려면 다음과 같이 실행합니다.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File deployment\publish_r2.ps1 `
+  -Version v3.1.1 `
+  -EnvFile "C:\path\to\.env.r2.local" `
+  -Promote
+```
+
+게시 스크립트는 Python/JavaScript 회귀 테스트를 통과한 allowlist bundle만 `biometry-ood/releases/<version>/`에 immutable cache로 올립니다. 원격 manifest 확인이 끝난 뒤에만 `stable.json`을 갱신하고 마지막 write로 `current/index.html`을 교체합니다. 따라서 파일이 서로 다른 버전으로 섞이지 않습니다. 롤백할 때는 해당 release tag/commit을 checkout하거나 그 tag의 기존 Actions run을 다시 실행한 뒤 같은 version을 `-Promote`합니다. 게시자는 원격 manifest의 file hash가 모두 같을 때만 idempotent 재승격을 허용합니다.
+
+GitHub 저장소에는 `Publish Biometry OOD Explorer` workflow도 포함됩니다. 다음 Actions secret을 등록합니다.
+
+- `R2_ACCOUNT_ID`
+- `R2_BUCKET`
+- `R2_ACCESS_KEY_ID`
+- `R2_SECRET_ACCESS_KEY`
+
+선택적으로 repository variable `R2_PUBLIC_BASE_URL`을 지정할 수 있으며 기본 공개 주소는 `https://releases.k-era.org`입니다. 수동 workflow에서는 publish와 promote를 분리할 수 있고, `biometry-ood-v*` tag push는 해당 tag version을 자동으로 공개 승격합니다.
+
 정적 호스팅 사업자는 IP 주소와 일반 접속 로그를 별도로 기록할 수 있습니다. 현재 앱은 입력값을 URL, form submission, cookie 또는 분석 서비스로 보내지 않지만, 배포 시에도 third-party analytics와 session-recording script를 추가하지 않아야 합니다.
 
 전공의에게는 `dist\IOLMasterParser.exe` 하나만 전달하면 됩니다.

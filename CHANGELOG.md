@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added versioned Cloudflare R2 publishing for the allowlisted static Explorer bundle, including SHA-256 manifests, immutable release paths, remote verification, explicit stable promotion, and rollback by version.
+- Added a GitHub Actions workflow for manual publish/promote and automatic promotion from `biometry-ood-v*` tags.
 - Added the continuous-age bilateral V3.1 OOD training pipeline with patient-level derivation, tuning, calibration, and untouched-test splits.
 - Added Core and Extended V3.1 model artifacts, cluster-aware validation reports, and the one-eye V3 sensitivity model for reproducibility.
 - Added Huber spline age adjustment, age-local MAD scaling, robust Minimum Covariance Determinant geometry, and age-weighted empirical percentile calibration.
@@ -16,6 +18,9 @@
 
 ### Changed
 
+- Added collision protection that permits idempotent publication of matching content but rejects an attempt to overwrite an existing version with different hashes.
+- Made `stable.json` and the no-cache gateway HTML the only mutable objects, with the gateway pointer written last after remote manifest verification.
+- Added a K-ERA-relative base path to the promoted entry so all versioned scripts, styles, and model requests remain on `/tools/biometry-ood`.
 - Switched the desktop parser, web calculator, and Windows build from the age-stratified V2 bundle to `continuous-age-bilateral-v3.1.0`.
 - Included both eligible eyes while keeping fellow eyes in the same patient-level data split to prevent leakage.
 - Replaced age-stratum switching with one continuous model across ages 2–100 years.
@@ -31,18 +36,22 @@
 
 ### Validation
 
+- Published and promoted the initial `v3.1.0` bundle to `releases.k-era.org`, then verified the stable metadata, entry HTML, immutable assets, active model, cache controls, and K-ERA proxy paths.
+- Added credential-free R2 dry-run coverage and verified the publisher with the PowerShell parser, the full 14-test Python suite, and the JavaScript core regression suite.
 - V3.1 Core used 8,177 eyes from 4,501 patients; Extended used 8,164 eyes from 4,498 patients.
 - The untouched bilateral test set contained 1,280 Core eyes and 1,275 Extended eyes, with patient-cluster bootstrap confidence intervals reported for category proportions.
 - Added Python and JavaScript regression tests for continuous age behavior, age-local percentile calibration, Core/Extended selection, demo cases, and tail-expanded scale mapping.
 - Made the Node regression test resolve model artifacts relative to `__dirname`, so it runs independently of the current working directory.
 - Added static deployment regression tests that verify the exact seven-file allowlist and reject contaminated output directories.
 - Added regression coverage for invalid optional-input fallback and sparse age-local calibration warnings.
+- Verified the R2 release and promotion workflow with a credential-free dry run covering all tests, the allowlisted build, manifest generation, immutable object paths, and stable-pointer writes.
 - Kept postoperative outcome interpretation explicitly exploratory; the OOD percentile does not directly predict refractive error or select an IOL formula.
 
 ### Repository
 
 - Excluded local lecture slides, manuscript figures, and other generated presentation outputs from version control.
 - Added a tracked pre-commit guard for clinical Excel/CSV/PDF sources and presentation/manuscript PPT, Word, and PNG artifacts.
+- Extended repository protection to ignore and pre-commit block local R2 credential files matching `.env*.local`.
 
 ## 2026-07-10
 

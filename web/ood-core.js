@@ -23,6 +23,19 @@
     return (100 * low) / sortedValues.length;
   }
 
+  function raritySummary(percentile, referenceCount) {
+    if (percentile < 90) {
+      return { value: "Common", caption: "Within the central 90% of reference eyes" };
+    }
+    const minimumTailPercent = 100 / Math.max(1, referenceCount);
+    const tailPercent = Math.max(100 - percentile, minimumTailPercent);
+    const frequency = Math.max(1, Math.round(100 / tailPercent));
+    return {
+      value: `1 in ${frequency}`,
+      caption: "reference eyes is this unusual or more",
+    };
+  }
+
   function modelsForAge(bundle, age) {
     return bundle.models.filter(
       (model) => age >= model.age_min_inclusive && age < model.age_max_exclusive,
@@ -92,13 +105,13 @@
     const percentile = percentileOf(model.reference_distances, distance);
 
     let score = 0;
-    let status = "Routine-range anatomy";
+    let status = "Typical anatomy";
     let statusClass = "status-routine";
     const score0Upper = model.score_thresholds_percentile.score_0_upper;
     const score1Upper = model.score_thresholds_percentile.score_1_upper;
     if (percentile >= score1Upper) {
       score = 2;
-      status = "Out-of-distribution anatomy";
+      status = "Highly unusual anatomy";
       statusClass = "status-ood";
     } else if (percentile >= score0Upper) {
       score = 1;
@@ -125,11 +138,12 @@
       status,
       statusClass,
       dominant,
+      rarity: raritySummary(percentile, model.reference_distances.length),
       model,
     };
   }
 
-  const api = { calculate, expectedByAge, percentileOf, selectModel, validate };
+  const api = { calculate, expectedByAge, percentileOf, raritySummary, selectModel, validate };
   root.BiometryOODCore = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 }(typeof globalThis !== "undefined" ? globalThis : this));

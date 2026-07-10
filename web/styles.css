@@ -195,6 +195,8 @@ input[aria-invalid="true"] { border-color: var(--red); }
 .percentile-result strong { font-size: 50px; }
 .primary-results strong small { font-size: 20px; margin-left: 3px; }
 .score-denominator { margin-left: 5px; color: var(--muted); font-size: 13px; }
+.metric-caption { display: block; margin-top: 7px; color: var(--muted); font-size: 12px; }
+.selected-model-value { display: block; max-width: 240px; font-size: 19px !important; line-height: 1.3 !important; color: var(--teal-dark) !important; }
 
 .percentile-track {
   position: relative;
@@ -246,16 +248,12 @@ input[aria-invalid="true"] { border-color: var(--red); }
 .deviation-row > span { margin: 0; }
 .deviation-row strong { text-align: right; }
 
-.model-selection-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--line);
-}
-.model-selection-row span { color: var(--muted); font-size: 13px; font-weight: 650; }
-.model-selection-row strong { text-align: right; color: var(--teal-dark); }
+.technical-details { margin-top: 16px; border-bottom: 1px solid var(--line); }
+.technical-details summary { padding: 10px 0 14px; color: var(--muted); font-size: 12px; cursor: pointer; }
+.technical-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin-bottom: 16px; background: var(--line); border: 1px solid var(--line); }
+.technical-grid div { padding: 12px 14px; background: var(--soft); }
+.technical-grid span { display: block; color: var(--muted); font-size: 11px; }
+.technical-grid strong { display: block; margin-top: 4px; font-size: 15px; }
 
 .interpretation-note {
   display: flex;
@@ -310,10 +308,9 @@ footer { padding: 18px 0; background: var(--navy); color: #c8d7df; font-size: 12
   .detail-item:nth-child(2) { border-right: 0; }
   .detail-item:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
   .deviation-row,
-  .model-selection-row,
   .interpretation-note { align-items: flex-start; flex-direction: column; gap: 6px; }
-  .deviation-row strong,
-  .model-selection-row strong { text-align: left; }
+  .deviation-row strong { text-align: left; }
+  .selected-model-value { max-width: none; font-size: 16px !important; }
   .interpretation-note strong { white-space: normal; }
   .model-facts { grid-template-columns: 1fr 1fr; }
   .model-facts div { padding: 4px 10px; }

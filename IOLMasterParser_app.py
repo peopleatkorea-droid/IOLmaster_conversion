@@ -32,8 +32,8 @@ SOURCE_COLUMNS = [
 
 OOD_OUTPUT_COLUMNS = [
     "Age_at_Biometry", "Mean_K", "Age_Adjusted_ACD", "Age_Adjusted_LT",
-    "OOD_Distance", "OOD_Percentile", "Anatomy_Score", "OOD_Status",
-    "OOD_Dominant_Deviation", "OOD_Age_Stratum", "OOD_Model_Tier", "OOD_Model_Version",
+    "OOD_Percentile", "OOD_Status", "OOD_Reference_Context", "OOD_Dominant_Deviation",
+    "OOD_Age_Stratum", "OOD_Model_Tier", "OOD_Model_Version", "OOD_Distance", "Anatomy_Score",
 ]
 
 OUTPUT_COLUMNS = SOURCE_COLUMNS + OOD_OUTPUT_COLUMNS
@@ -47,7 +47,7 @@ NUMERIC_COLUMNS = {
 
 TEXT_COLUMNS = {
     "Pat_ID", "Last_Name", "First_Name", "DOB", "Acquisition_Date", "Eye_Side",
-    "OOD_Status", "OOD_Dominant_Deviation", "OOD_Model_Version",
+    "OOD_Status", "OOD_Reference_Context", "OOD_Dominant_Deviation", "OOD_Model_Version",
     "OOD_Age_Stratum", "OOD_Model_Tier",
 }
 
@@ -194,9 +194,9 @@ def write_eye_based_xlsx(rows, xlsx_path: Path):
 
     status_col = get_column_letter(OUTPUT_COLUMNS.index("OOD_Status") + 1)
     status_fills = {
-        "Routine-range anatomy": PatternFill("solid", fgColor="E2F0D9"),
+        "Typical anatomy": PatternFill("solid", fgColor="E2F0D9"),
         "Uncommon anatomy": PatternFill("solid", fgColor="FFF2CC"),
-        "Out-of-distribution anatomy": PatternFill("solid", fgColor="FCE4D6"),
+        "Highly unusual anatomy": PatternFill("solid", fgColor="FCE4D6"),
         "Not calculated": PatternFill("solid", fgColor="E7E6E6"),
     }
     for cell_tuple in ws[f"{status_col}2:{status_col}{ws.max_row}"]:

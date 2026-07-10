@@ -29,12 +29,14 @@ function showResult(result) {
   document.querySelector("#percentile-value").textContent = result.percentile.toFixed(1);
   document.querySelector("#score-value").textContent = result.score;
   document.querySelector("#distance-value").textContent = result.distance.toFixed(3);
+  document.querySelector("#rarity-value").textContent = result.rarity.value;
+  document.querySelector("#rarity-caption").textContent = result.rarity.caption;
   document.querySelector("#expected-acd").textContent = `${result.expectedAcd.toFixed(3)} mm`;
   document.querySelector("#adjusted-acd").textContent = `${result.adjustedAcd >= 0 ? "+" : ""}${result.adjustedAcd.toFixed(3)} mm`;
   document.querySelector("#expected-lt").textContent = `${result.expectedLt.toFixed(3)} mm`;
   document.querySelector("#adjusted-lt").textContent = `${result.adjustedLt >= 0 ? "+" : ""}${result.adjustedLt.toFixed(3)} mm`;
   document.querySelector("#dominant-deviation").textContent = result.dominant;
-  document.querySelector("#selected-model").textContent = `${result.model.stratum_label} / ${result.model.tier}`;
+  document.querySelector("#selected-model-primary").textContent = `${result.model.stratum_label} / ${result.model.tier}`;
   document.querySelector("#model-version").textContent = result.model.model_version;
   document.querySelector("#reference-eyes").textContent = result.model.reference_rows.toLocaleString();
   document.querySelector("#age-range").textContent = result.model.display_age_range;

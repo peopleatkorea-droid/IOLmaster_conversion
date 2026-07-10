@@ -42,12 +42,20 @@ class BiometryOODTests(unittest.TestCase):
         self.assertIn("ACD vs age", result["OOD_Dominant_Deviation"])
         self.assertEqual(result["OOD_Age_Stratum"], "Adult cataract-age")
         self.assertEqual(result["OOD_Model_Tier"], "Core")
+        self.assertEqual(
+            result["OOD_Reference_Context"],
+            "About 1 in 16 reference eyes is this unusual or more",
+        )
 
     def test_wtw_cct_select_extended_model(self):
         result = self.model.score_values(80, 23.61, 40.80, 1.94, 5.58, 10.99, 0.601)
         self.assertEqual(result["OOD_Model_Tier"], "Extended")
         self.assertEqual(result["OOD_Model_Version"], "adult-extended-v2.0.0")
         self.assertAlmostEqual(result["OOD_Percentile"], 96.392, places=3)
+        self.assertEqual(
+            result["OOD_Reference_Context"],
+            "About 1 in 28 reference eyes is this unusual or more",
+        )
 
     def test_age_selects_stratum(self):
         pediatric = self.model.score_values(8, 23.05, 43.31, 3.55, 3.47)

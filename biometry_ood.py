@@ -55,6 +55,15 @@ def _dot_matrix_vector(matrix, vector):
     return [sum(row[j] * vector[j] for j in range(len(vector))) for row in matrix]
 
 
+def reference_context(percentile, reference_count):
+    if percentile < 90.0:
+        return "Within the central 90% of reference eyes"
+    minimum_tail_percent = 100.0 / max(1, reference_count)
+    tail_percent = max(100.0 - percentile, minimum_tail_percent)
+    frequency = max(1, round(100.0 / tail_percent))
+    return f"About 1 in {frequency} reference eyes is this unusual or more"
+
+
 class BiometryOODModel:
     def __init__(self, payload):
         self.payload = payload
@@ -136,11 +145,11 @@ class BiometryOODModel:
         score_0_upper = self.score_thresholds["score_0_upper"]
         score_1_upper = self.score_thresholds["score_1_upper"]
         if percentile < score_0_upper:
-            score, status = 0, "Routine-range anatomy"
+            score, status = 0, "Typical anatomy"
         elif percentile < score_1_upper:
             score, status = 1, "Uncommon anatomy"
         else:
-            score, status = 2, "Out-of-distribution anatomy"
+            score, status = 2, "Highly unusual anatomy"
 
         z_scores = [
             delta[i] / self.standard_deviations[i] if self.standard_deviations[i] > 0 else 0.0
@@ -158,6 +167,7 @@ class BiometryOODModel:
             "OOD_Percentile": round(percentile, 3),
             "Anatomy_Score": score,
             "OOD_Status": status,
+            "OOD_Reference_Context": reference_context(percentile, len(self.reference_distances)),
             "OOD_Dominant_Deviation": dominant,
             "OOD_Age_Stratum": self.stratum_label,
             "OOD_Model_Tier": self.tier,
@@ -174,6 +184,7 @@ class BiometryOODModel:
             "OOD_Percentile": None,
             "Anatomy_Score": None,
             "OOD_Status": "Not calculated",
+            "OOD_Reference_Context": None,
             "OOD_Dominant_Deviation": reason,
             "OOD_Age_Stratum": self.stratum_label,
             "OOD_Model_Tier": self.tier,
@@ -261,6 +272,7 @@ class BiometryOODSelector:
             "OOD_Percentile": None,
             "Anatomy_Score": None,
             "OOD_Status": "Not calculated",
+            "OOD_Reference_Context": None,
             "OOD_Dominant_Deviation": reason,
             "OOD_Age_Stratum": None,
             "OOD_Model_Tier": None,

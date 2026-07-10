@@ -31,6 +31,10 @@ const extended = core.calculate(model, {
 });
 assert.strictEqual(extended.model.model_key, "adult_extended");
 assert(Math.abs(extended.percentile - 96.39220250218213) < 1e-10);
+assert.deepStrictEqual(extended.rarity, {
+  value: "1 in 28",
+  caption: "reference eyes is this unusual or more",
+});
 
 assert.strictEqual(core.selectModel(model, { age: 8, wtw: null, cct: null }).model_key, "pediatric_core");
 assert.strictEqual(core.selectModel(model, { age: 25, wtw: 12, cct: 0.54 }).model_key, "young_adult_extended");

@@ -96,13 +96,13 @@
               <strong><span id="percentile-value">0.0</span><small>%</small></strong>
             </div>
             <div class="score-result">
-              <span class="metric-label">Anatomy score</span>
-              <strong id="score-value">0</strong>
-              <span class="score-denominator">of 2</span>
+              <span class="metric-label">Reference rarity</span>
+              <strong id="rarity-value">-</strong>
+              <span class="metric-caption" id="rarity-caption">-</span>
             </div>
             <div class="distance-result">
-              <span class="metric-label">OOD distance</span>
-              <strong id="distance-value">0.000</strong>
+              <span class="metric-label">Selected model</span>
+              <strong class="selected-model-value" id="selected-model-primary">-</strong>
             </div>
           </div>
 
@@ -137,10 +137,14 @@
             <span>Dominant standardized deviations</span>
             <strong id="dominant-deviation">-</strong>
           </div>
-          <div class="model-selection-row">
-            <span>Selected model</span>
-            <strong id="selected-model">-</strong>
-          </div>
+
+          <details class="technical-details">
+            <summary>Technical model details</summary>
+            <div class="technical-grid">
+              <div><span>Anatomy score</span><strong><span id="score-value">0</span> / 2</strong></div>
+              <div><span>Mahalanobis OOD distance</span><strong id="distance-value">0.000</strong></div>
+            </div>
+          </details>
 
           <div class="interpretation-note">
             <strong>Anatomical rarity, not refractive prediction.</strong>

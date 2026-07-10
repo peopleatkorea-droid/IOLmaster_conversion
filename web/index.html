@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Research-use age-adjusted biometry out-of-distribution calculator">
+  <title>Biometry OOD Explorer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div>
+        <p class="product-kicker">Research prototype</p>
+        <h1>Biometry OOD Explorer</h1>
+      </div>
+      <div class="model-state" id="model-state" role="status">Loading model</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="input-band" aria-labelledby="input-heading">
+      <div class="content-width">
+        <div class="section-heading">
+          <div>
+            <p class="section-index">01</p>
+            <h2 id="input-heading">Biometry inputs</h2>
+          </div>
+          <div class="actions secondary-actions">
+            <button type="button" class="button button-secondary" id="example-button">Load example</button>
+            <button type="button" class="button button-quiet" id="reset-button">Reset</button>
+          </div>
+        </div>
+
+        <form id="calculator-form" novalidate>
+          <div class="input-grid">
+            <label>
+              <span>Age <small>years</small></span>
+              <input id="age" name="age" type="number" min="2" max="100" step="0.1" inputmode="decimal" required>
+            </label>
+            <label>
+              <span>Axial length <small>mm</small></span>
+              <input id="al" name="al" type="number" min="18" max="38" step="0.01" inputmode="decimal" required>
+            </label>
+            <label>
+              <span>Mean K <small>D</small></span>
+              <input id="mean-k" name="meanK" type="number" min="30" max="60" step="0.01" inputmode="decimal" required>
+            </label>
+            <label>
+              <span>ACD <small>mm</small></span>
+              <input id="acd" name="acd" type="number" min="0.8" max="6" step="0.01" inputmode="decimal" required>
+            </label>
+            <label>
+              <span>Lens thickness <small>mm</small></span>
+              <input id="lt" name="lt" type="number" min="2" max="8" step="0.01" inputmode="decimal" required>
+            </label>
+            <label>
+              <span>WTW <small>mm, optional</small></span>
+              <input id="wtw" name="wtw" type="number" min="8" max="16" step="0.01" inputmode="decimal">
+            </label>
+            <label>
+              <span>CCT <small>mm, optional</small></span>
+              <input id="cct" name="cct" type="number" min="0.35" max="0.8" step="0.001" inputmode="decimal">
+            </label>
+          </div>
+          <div class="form-footer">
+            <div class="form-feedback">
+              <p class="model-preview" id="model-preview">Age selects the reference model automatically.</p>
+              <p class="validation-message" id="validation-message" aria-live="polite"></p>
+            </div>
+            <button type="submit" class="button button-primary" id="calculate-button" disabled>Calculate OOD</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="result-band" aria-labelledby="result-heading">
+      <div class="content-width">
+        <div class="section-heading result-heading-row">
+          <div>
+            <p class="section-index">02</p>
+            <h2 id="result-heading">Anatomy result</h2>
+          </div>
+          <span class="status-label status-waiting" id="status-label">Awaiting input</span>
+        </div>
+
+        <div class="result-empty" id="result-empty">
+          <span class="empty-rule" aria-hidden="true"></span>
+          <p>Enter the five core measurements to place this eye within the institutional reference distribution.</p>
+        </div>
+
+        <div class="result-content" id="result-content" hidden>
+          <div class="primary-results">
+            <div class="percentile-result">
+              <span class="metric-label">Institutional percentile</span>
+              <strong><span id="percentile-value">0.0</span><small>%</small></strong>
+            </div>
+            <div class="score-result">
+              <span class="metric-label">Anatomy score</span>
+              <strong id="score-value">0</strong>
+              <span class="score-denominator">of 2</span>
+            </div>
+            <div class="distance-result">
+              <span class="metric-label">OOD distance</span>
+              <strong id="distance-value">0.000</strong>
+            </div>
+          </div>
+
+          <div class="percentile-track" aria-label="OOD percentile scale">
+            <div class="track-segment track-routine"><span>Routine</span></div>
+            <div class="track-segment track-uncommon"><span>Uncommon</span></div>
+            <div class="track-segment track-ood"><span>OOD</span></div>
+            <span class="track-marker" id="track-marker" aria-hidden="true"></span>
+          </div>
+          <div class="track-labels" aria-hidden="true"><span>0</span><span>90</span><span>97.5</span><span>100</span></div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span>Expected ACD for age</span>
+              <strong id="expected-acd">-</strong>
+            </div>
+            <div class="detail-item">
+              <span>ACD residual</span>
+              <strong id="adjusted-acd">-</strong>
+            </div>
+            <div class="detail-item">
+              <span>Expected LT for age</span>
+              <strong id="expected-lt">-</strong>
+            </div>
+            <div class="detail-item">
+              <span>LT residual</span>
+              <strong id="adjusted-lt">-</strong>
+            </div>
+          </div>
+
+          <div class="deviation-row">
+            <span>Dominant standardized deviations</span>
+            <strong id="dominant-deviation">-</strong>
+          </div>
+          <div class="model-selection-row">
+            <span>Selected model</span>
+            <strong id="selected-model">-</strong>
+          </div>
+
+          <div class="interpretation-note">
+            <strong>Anatomical rarity, not refractive prediction.</strong>
+            <span>A high percentile does not establish a large postoperative prediction error or identify the best formula.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="model-band" aria-labelledby="model-heading">
+      <div class="content-width model-layout">
+        <div>
+          <p class="section-index">03</p>
+          <h2 id="model-heading">Reference model</h2>
+        </div>
+        <dl class="model-facts">
+          <div><dt>Version</dt><dd id="model-version">-</dd></div>
+          <div><dt>Reference eyes</dt><dd id="reference-eyes">-</dd></div>
+          <div><dt>Age range</dt><dd id="age-range">-</dd></div>
+          <div><dt>Processing</dt><dd>Browser only</dd></div>
+        </dl>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="content-width">
+      <span id="cohort-note">Single-center research prototype. External and postoperative outcome validation are required before clinical decision-support use.</span>
+    </div>
+  </footer>
+
+  <script src="ood-core.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>

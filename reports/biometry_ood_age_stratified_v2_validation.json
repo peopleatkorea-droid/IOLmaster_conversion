@@ -1,0 +1,191 @@
+{
+  "bundle_version": "age-stratified-v2.0.0",
+  "trained_at_utc": "2026-07-10T10:56:10+00:00",
+  "source": {
+    "filename": "IOLMaster700_corrected_3.xlsx",
+    "sha256": "12dda673d513a2b4e19d921a34fd06596a46ef21e41d2e1cce12121bd8a6e52a",
+    "worksheet": "Corrected_All_Eyes"
+  },
+  "models": [
+    {
+      "model_key": "pediatric_core",
+      "model_version": "pediatric-core-v2.0.0",
+      "age_range": "2-17 years",
+      "tier": "Core",
+      "inputs": [
+        "AL",
+        "Mean_K",
+        "ACD",
+        "LT"
+      ],
+      "reference_rows": 976,
+      "reference_patients": 500,
+      "cohort_status": "Provisional pediatric biometry reference; indication not verified by EMR.",
+      "filter_counts": {
+        "source_rows": 12615,
+        "age_eligible_rows": 1193,
+        "excluded_test_or_demo": 2,
+        "excluded_missing_or_invalid": 46,
+        "excluded_input_range": 6,
+        "superseded_repeat_exam": 165,
+        "reference_patient_ids": 500
+      },
+      "distance_thresholds": {
+        "p90": 2.8745840764557613,
+        "p97_5": 4.106424017704999
+      }
+    },
+    {
+      "model_key": "pediatric_extended",
+      "model_version": "pediatric-extended-v2.0.0",
+      "age_range": "2-17 years",
+      "tier": "Extended",
+      "inputs": [
+        "AL",
+        "Mean_K",
+        "ACD",
+        "LT",
+        "WTW",
+        "CCT"
+      ],
+      "reference_rows": 967,
+      "reference_patients": 497,
+      "cohort_status": "Provisional pediatric biometry reference; indication not verified by EMR.",
+      "filter_counts": {
+        "source_rows": 12615,
+        "age_eligible_rows": 1193,
+        "excluded_test_or_demo": 2,
+        "excluded_missing_or_invalid": 60,
+        "excluded_input_range": 5,
+        "superseded_repeat_exam": 161,
+        "reference_patient_ids": 497
+      },
+      "distance_thresholds": {
+        "p90": 3.435481565123448,
+        "p97_5": 4.653672695071459
+      }
+    },
+    {
+      "model_key": "young_adult_core",
+      "model_version": "young_adult-core-v2.0.0",
+      "age_range": "18-39 years",
+      "tier": "Core",
+      "inputs": [
+        "AL",
+        "Mean_K",
+        "ACD",
+        "LT"
+      ],
+      "reference_rows": 317,
+      "reference_patients": 166,
+      "cohort_status": "Provisional young-adult biometry reference; referral enrichment is possible.",
+      "filter_counts": {
+        "source_rows": 12615,
+        "age_eligible_rows": 498,
+        "excluded_test_or_demo": 2,
+        "excluded_missing_or_invalid": 53,
+        "excluded_input_range": 17,
+        "superseded_repeat_exam": 111,
+        "reference_patient_ids": 166
+      },
+      "distance_thresholds": {
+        "p90": 2.899460760802599,
+        "p97_5": 4.480692147100897
+      }
+    },
+    {
+      "model_key": "young_adult_extended",
+      "model_version": "young_adult-extended-v2.0.0",
+      "age_range": "18-39 years",
+      "tier": "Extended",
+      "inputs": [
+        "AL",
+        "Mean_K",
+        "ACD",
+        "LT",
+        "WTW",
+        "CCT"
+      ],
+      "reference_rows": 315,
+      "reference_patients": 166,
+      "cohort_status": "Provisional young-adult biometry reference; referral enrichment is possible.",
+      "filter_counts": {
+        "source_rows": 12615,
+        "age_eligible_rows": 498,
+        "excluded_test_or_demo": 2,
+        "excluded_missing_or_invalid": 55,
+        "excluded_input_range": 17,
+        "superseded_repeat_exam": 111,
+        "reference_patient_ids": 166
+      },
+      "distance_thresholds": {
+        "p90": 3.477665030831493,
+        "p97_5": 4.8941302066683825
+      }
+    },
+    {
+      "model_key": "adult_core",
+      "model_version": "adult-core-v2.0.0",
+      "age_range": "40-100 years",
+      "tier": "Core",
+      "inputs": [
+        "AL",
+        "Mean_K",
+        "ACD",
+        "LT"
+      ],
+      "reference_rows": 6876,
+      "reference_patients": 3836,
+      "cohort_status": "Primary adult institutional biometry reference.",
+      "filter_counts": {
+        "source_rows": 12615,
+        "age_eligible_rows": 10922,
+        "excluded_test_or_demo": 2,
+        "excluded_missing_or_invalid": 1062,
+        "excluded_input_range": 971,
+        "superseded_repeat_exam": 2013,
+        "reference_patient_ids": 3836
+      },
+      "distance_thresholds": {
+        "p90": 2.939988958867108,
+        "p97_5": 4.215100935712304
+      }
+    },
+    {
+      "model_key": "adult_extended",
+      "model_version": "adult-extended-v2.0.0",
+      "age_range": "40-100 years",
+      "tier": "Extended",
+      "inputs": [
+        "AL",
+        "Mean_K",
+        "ACD",
+        "LT",
+        "WTW",
+        "CCT"
+      ],
+      "reference_rows": 6874,
+      "reference_patients": 3836,
+      "cohort_status": "Primary adult institutional biometry reference.",
+      "filter_counts": {
+        "source_rows": 12615,
+        "age_eligible_rows": 10922,
+        "excluded_test_or_demo": 2,
+        "excluded_missing_or_invalid": 1080,
+        "excluded_input_range": 969,
+        "superseded_repeat_exam": 1999,
+        "reference_patient_ids": 3836
+      },
+      "distance_thresholds": {
+        "p90": 3.457331563950719,
+        "p97_5": 4.863808989621719
+      }
+    }
+  ],
+  "limitations": [
+    "Pediatric and young-adult surgical indication is not available in the source workbook.",
+    "Both eyes may contribute; reference-eye counts are not independent patient counts.",
+    "Core and Extended percentiles are separately calibrated and should not be numerically pooled.",
+    "External and postoperative outcome validation are required before clinical decision-support use."
+  ]
+}

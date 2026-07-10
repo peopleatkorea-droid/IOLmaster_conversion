@@ -41,7 +41,7 @@ echo [2/4] Installing packages...
 if errorlevel 1 goto error
 
 echo [3/4] Building no-install EXE...
-.venv\Scripts\pyinstaller.exe --onefile --windowed --name IOLMasterParser IOLMasterParser_app.py
+.venv\Scripts\pyinstaller.exe --noconfirm --clean --onefile --windowed --name IOLMasterParser --add-data "models\biometry_ood_age_stratified_v2.json;models" IOLMasterParser_app.py
 if errorlevel 1 goto error
 
 echo [4/4] Done.

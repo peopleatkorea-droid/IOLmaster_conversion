@@ -20,20 +20,36 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils import get_column_letter
 
-APP_NAME = "IOLMaster 700 CSV Converter"
+from biometry_ood import load_default_model
 
-OUTPUT_COLUMNS = [
+APP_NAME = "IOLMaster 700 Biometry Parser"
+
+SOURCE_COLUMNS = [
     "Pat_ID", "Last_Name", "First_Name", "DOB", "Acquisition_Date", "Eye_Side",
     "AL", "AL_SD", "R1", "R2", "A1", "A2", "TR1", "TR2", "TA1", "TA2",
     "ACD", "AQD", "LT", "CCT", "W2W", "P", "Sphere", "Cylinder", "Axis",
 ]
 
+OOD_OUTPUT_COLUMNS = [
+    "Age_at_Biometry", "Mean_K", "Age_Adjusted_ACD", "Age_Adjusted_LT",
+    "OOD_Distance", "OOD_Percentile", "Anatomy_Score", "OOD_Status",
+    "OOD_Dominant_Deviation", "OOD_Age_Stratum", "OOD_Model_Tier", "OOD_Model_Version",
+]
+
+OUTPUT_COLUMNS = SOURCE_COLUMNS + OOD_OUTPUT_COLUMNS
+
 NUMERIC_COLUMNS = {
     "AL", "AL_SD", "R1", "R2", "A1", "A2", "TR1", "TR2", "TA1", "TA2",
     "ACD", "AQD", "LT", "CCT", "W2W", "P", "Sphere", "Cylinder", "Axis",
+    "Age_at_Biometry", "Mean_K", "Age_Adjusted_ACD", "Age_Adjusted_LT",
+    "OOD_Distance", "OOD_Percentile", "Anatomy_Score",
 }
 
-TEXT_COLUMNS = {"Pat_ID", "Last_Name", "First_Name", "DOB", "Acquisition_Date", "Eye_Side"}
+TEXT_COLUMNS = {
+    "Pat_ID", "Last_Name", "First_Name", "DOB", "Acquisition_Date", "Eye_Side",
+    "OOD_Status", "OOD_Dominant_Deviation", "OOD_Model_Version",
+    "OOD_Age_Stratum", "OOD_Model_Tier",
+}
 
 CSV_ENCODINGS = ("utf-8-sig", "utf-16", "cp949")
 
@@ -90,12 +106,20 @@ def read_iolmaster_csv(csv_path: Path):
 
     reader = csv.DictReader(io.StringIO("\n".join(lines[header_idx:])), delimiter=";")
     fieldnames = reader.fieldnames or []
-    missing = [col for col in OUTPUT_COLUMNS if col not in fieldnames]
+    missing = [col for col in SOURCE_COLUMNS if col not in fieldnames]
     if missing:
         raise ValueError(
             "CSV 형식이 예상과 다릅니다. 누락된 컬럼: " + ", ".join(missing)
         )
-    rows = [[parse_value(col, row.get(col, "")) for col in OUTPUT_COLUMNS] for row in reader]
+    model = load_default_model()
+    rows = []
+    for csv_row in reader:
+        source_row = {col: parse_value(col, csv_row.get(col, "")) for col in SOURCE_COLUMNS}
+        ood_result = model.score_row(source_row)
+        rows.append(
+            [source_row[col] for col in SOURCE_COLUMNS]
+            + [ood_result[col] for col in OOD_OUTPUT_COLUMNS]
+        )
     return rows
 
 
@@ -120,13 +144,14 @@ def write_eye_based_xlsx(rows, xlsx_path: Path):
         ws.append(row)
 
     header_fill = PatternFill("solid", fgColor="1F4E78")
+    ood_header_fill = PatternFill("solid", fgColor="0F766E")
     header_font = Font(bold=True, color="FFFFFF")
     header_alignment = Alignment(horizontal="center", vertical="center")
     thin_gray = Side(style="thin", color="D9E2F3")
     border = Border(left=thin_gray, right=thin_gray, top=thin_gray, bottom=thin_gray)
 
-    for cell in ws[1]:
-        cell.fill = header_fill
+    for col_idx, cell in enumerate(ws[1], start=1):
+        cell.fill = ood_header_fill if col_idx > len(SOURCE_COLUMNS) else header_fill
         cell.font = header_font
         cell.alignment = header_alignment
         cell.border = border
@@ -141,6 +166,8 @@ def write_eye_based_xlsx(rows, xlsx_path: Path):
 
     # Number formats
     numeric_9_dec = ["AL", "AL_SD", "R1", "R2", "A1", "A2", "TR1", "TR2", "TA1", "TA2", "ACD", "AQD", "LT", "CCT", "W2W", "P"]
+    numeric_6_dec = ["Mean_K", "Age_Adjusted_ACD", "Age_Adjusted_LT", "OOD_Distance"]
+    numeric_3_dec = ["Age_at_Biometry", "OOD_Percentile"]
     numeric_2_dec = ["Sphere", "Cylinder"]
     for col_idx, col_name in enumerate(OUTPUT_COLUMNS, start=1):
         letter = get_column_letter(col_idx)
@@ -149,15 +176,33 @@ def write_eye_based_xlsx(rows, xlsx_path: Path):
         if col_name in numeric_9_dec:
             for cell in ws[f"{letter}2:{letter}{ws.max_row}"]:
                 cell[0].number_format = "0.000000000"
+        elif col_name in numeric_6_dec:
+            for cell in ws[f"{letter}2:{letter}{ws.max_row}"]:
+                cell[0].number_format = "0.000000"
+        elif col_name in numeric_3_dec:
+            for cell in ws[f"{letter}2:{letter}{ws.max_row}"]:
+                cell[0].number_format = "0.000"
         elif col_name in numeric_2_dec:
             for cell in ws[f"{letter}2:{letter}{ws.max_row}"]:
                 cell[0].number_format = "0.00"
         elif col_name == "Pat_ID":
             for cell in ws[f"{letter}2:{letter}{ws.max_row}"]:
                 cell[0].number_format = "@"
-        elif col_name == "Axis":
+        elif col_name in {"Axis", "Anatomy_Score"}:
             for cell in ws[f"{letter}2:{letter}{ws.max_row}"]:
                 cell[0].number_format = "0"
+
+    status_col = get_column_letter(OUTPUT_COLUMNS.index("OOD_Status") + 1)
+    status_fills = {
+        "Routine-range anatomy": PatternFill("solid", fgColor="E2F0D9"),
+        "Uncommon anatomy": PatternFill("solid", fgColor="FFF2CC"),
+        "Out-of-distribution anatomy": PatternFill("solid", fgColor="FCE4D6"),
+        "Not calculated": PatternFill("solid", fgColor="E7E6E6"),
+    }
+    for cell_tuple in ws[f"{status_col}2:{status_col}{ws.max_row}"]:
+        cell = cell_tuple[0]
+        if cell.value in status_fills:
+            cell.fill = status_fills[cell.value]
 
     if ws.max_row >= 1:
         ref = f"A1:{get_column_letter(len(OUTPUT_COLUMNS))}{ws.max_row}"
@@ -196,12 +241,12 @@ class ConverterApp:
         self.status = tk.StringVar(value="CSV 파일을 선택해 주세요.")
 
         pad = {"padx": 22, "pady": 8}
-        title = tk.Label(root, text="IOLMaster 700 CSV → Eye-based XLSX", font=("맑은 고딕", 15, "bold"))
+        title = tk.Label(root, text="IOLMaster 700 CSV → Biometry XLSX", font=("맑은 고딕", 15, "bold"))
         title.pack(pady=(22, 6))
 
         desc = tk.Label(
             root,
-            text="CSV 파일을 선택하면 동일 폴더에 XLSX로 변환합니다.",
+            text="CSV를 변환하고 age-adjusted anatomy OOD score를 계산합니다.",
             font=("맑은 고딕", 10),
         )
         desc.pack()
@@ -216,7 +261,7 @@ class ConverterApp:
         tk.Button(root, text="변환 시작", command=self.convert, height=2, width=22, font=("맑은 고딕", 10, "bold")).pack(pady=12)
         tk.Label(root, textvariable=self.status, fg="#333333", wraplength=460, justify="center").pack(pady=(4, 0))
 
-        note = tk.Label(root, text="※ Python 설치 불필요 / Excel 없어도 XLSX 생성 가능", fg="#666666", font=("맑은 고딕", 9))
+        note = tk.Label(root, text="※ 연구용 해부학적 희귀도 지표이며 굴절오차 예측값이 아닙니다.", fg="#666666", font=("맑은 고딕", 9))
         note.pack(side="bottom", pady=(0, 12))
 
     def choose_csv(self):

@@ -1,18 +1,71 @@
 (function attachBiometryOODCore(root) {
+  function interpolate(value, anchors, values) {
+    if (value <= anchors[0]) return values[0];
+    if (value >= anchors[anchors.length - 1]) return values[values.length - 1];
+    let upper = 1;
+    while (upper < anchors.length && value > anchors[upper]) upper += 1;
+    const lower = upper - 1;
+    const fraction = (value - anchors[lower]) / (anchors[upper] - anchors[lower]);
+    return values[lower] + fraction * (values[upper] - values[lower]);
+  }
+
+  function quantile(sortedValues, probability) {
+    const position = (sortedValues.length - 1) * probability;
+    const lower = Math.floor(position);
+    const upper = Math.ceil(position);
+    if (lower === upper) return sortedValues[lower];
+    const fraction = position - lower;
+    return sortedValues[lower] + fraction * (sortedValues[upper] - sortedValues[lower]);
+  }
+
+  function tailExpandedPosition(percentile) {
+    const value = Math.min(100, Math.max(0, Number(percentile)));
+    if (value <= 90) return (value / 90) * 65;
+    if (value <= 97.5) return 65 + ((value - 90) / 7.5) * 22;
+    return 87 + ((value - 97.5) / 2.5) * 13;
+  }
+
   function expectedByAge(model, name, age) {
     const adjustment = model.age_adjustment;
     const feature = adjustment.features[name];
     if (!feature) return null;
     const t = (age - adjustment.age_center_years) / adjustment.age_scale_years;
     const coefficients = feature.coefficients;
+    if (adjustment.basis === "linear hinge spline") {
+      let result = coefficients[0] + coefficients[1] * t;
+      adjustment.knots_years.forEach((knot, index) => {
+        const scaledKnot = (knot - adjustment.age_center_years) / adjustment.age_scale_years;
+        result += coefficients[index + 2] * Math.max(0, t - scaledKnot);
+      });
+      return result;
+    }
     return coefficients[0] + coefficients[1] * t + coefficients[2] * t * t;
+  }
+
+  function scaleByAge(model, name, age, index) {
+    const feature = model.age_adjustment.features[name] || {};
+    if (feature.scale_anchors_years) {
+      return interpolate(age, feature.scale_anchors_years, feature.scale_values);
+    }
+    return model.feature_scalers ? model.feature_scalers[index] : 1;
   }
 
   function matrixVector(matrix, vector) {
     return matrix.map((row) => row.reduce((sum, value, index) => sum + value * vector[index], 0));
   }
 
-  function percentileOf(sortedValues, value) {
+  function lowerBound(sortedValues, value) {
+    let low = 0;
+    let high = sortedValues.length;
+    while (low < high) {
+      const middle = Math.floor((low + high) / 2);
+      if (sortedValues[middle] < value) low = middle + 1;
+      else high = middle;
+    }
+    return low;
+  }
+
+  function upperBound(sortedValues, value) {
     let low = 0;
     let high = sortedValues.length;
     while (low < high) {
@@ -20,19 +73,64 @@
       if (value < sortedValues[middle]) high = middle;
       else low = middle + 1;
     }
-    return (100 * low) / sortedValues.length;
+    return low;
   }
 
-  function raritySummary(percentile, referenceCount) {
-    if (percentile < 90) {
-      return { value: "Common", caption: "Within the central 90% of reference eyes" };
+  function percentileOf(sortedValues, value) {
+    return (100 * upperBound(sortedValues, value)) / sortedValues.length;
+  }
+
+  function calibratedPercentile(model, age, distance) {
+    if (model.calibration_age_distance && model.age_calibration_bandwidth_years) {
+      let totalWeight = 0;
+      let belowWeight = 0;
+      let squaredWeight = 0;
+      const bandwidth = model.age_calibration_bandwidth_years;
+      const clusterWeights = new Map();
+      let hasClusters = false;
+      model.calibration_age_distance.forEach((pair, pairIndex) => {
+        const [calibrationAge, calibrationDistance] = pair;
+        const clusterId = pair.length > 2 ? pair[2] : pairIndex;
+        hasClusters = hasClusters || pair.length > 2;
+        const standardizedAge = (calibrationAge - age) / bandwidth;
+        const weight = Math.exp(-0.5 * standardizedAge * standardizedAge);
+        totalWeight += weight;
+        squaredWeight += weight * weight;
+        clusterWeights.set(clusterId, (clusterWeights.get(clusterId) || 0) + weight);
+        if (calibrationDistance < distance) belowWeight += weight;
+      });
+      const denominator = totalWeight + 1;
+      const effectiveDenominator = hasClusters
+        ? [...clusterWeights.values()].reduce((sum, weight) => sum + weight * weight, 0)
+        : squaredWeight;
+      return {
+        percentile: (100 * belowWeight) / denominator,
+        tailProbability: (1 + totalWeight - belowWeight) / denominator,
+        effectiveN: effectiveDenominator ? (totalWeight * totalWeight) / effectiveDenominator : 0,
+        ageLocal: true,
+      };
     }
-    const minimumTailPercent = 100 / Math.max(1, referenceCount);
-    const tailPercent = Math.max(100 - percentile, minimumTailPercent);
-    const frequency = Math.max(1, Math.round(100 / tailPercent));
+    const distances = model.calibration_distances || model.reference_distances;
+    const percentile = (100 * upperBound(distances, distance)) / distances.length;
+    return {
+      percentile,
+      tailProbability: Math.max(1 - percentile / 100, 1 / Math.max(1, distances.length)),
+      effectiveN: distances.length,
+      ageLocal: false,
+    };
+  }
+
+  function raritySummary(percentile, tailProbability, ageLocal, referenceUnit = null) {
+    if (percentile < 90) {
+      return {
+        value: "Common",
+        caption: `Within the central 90% of ${referenceUnit || (ageLocal ? "age-matched calibration patients" : "reference eyes")}`,
+      };
+    }
+    const frequency = Math.max(1, Math.round(1 / tailProbability));
     return {
       value: `1 in ${frequency}`,
-      caption: "reference eyes is this unusual or more",
+      caption: `${referenceUnit || (ageLocal ? "age-weighted calibration patients" : "reference eyes")} is this unusual or more`,
     };
   }
 
@@ -76,13 +174,7 @@
     return "";
   }
 
-  function calculate(bundle, values) {
-    const model = selectModel(bundle, values);
-    if (!model) throw new Error("No OOD model is available for this age.");
-    const expectedAcd = expectedByAge(model, "ACD", values.age);
-    const expectedLt = expectedByAge(model, "LT", values.age);
-    const adjustedAcd = values.acd - expectedAcd;
-    const adjustedLt = values.lt - expectedLt;
+  function calculateForModel(model, values) {
     const source = {
       AL: values.al,
       Mean_K: values.meanK,
@@ -91,9 +183,11 @@
       WTW: values.wtw,
       CCT: values.cct,
     };
-    const vector = model.inputs.map((name) => {
+    const residuals = {};
+    const vector = model.inputs.map((name, index) => {
       const expected = expectedByAge(model, name, values.age);
-      return expected === null ? source[name] : source[name] - expected;
+      residuals[name] = expected === null ? source[name] : source[name] - expected;
+      return residuals[name] / scaleByAge(model, name, values.age, index);
     });
     const delta = vector.map((value, index) => value - model.robust_location[index]);
     const projected = matrixVector(model.precision_matrix, delta);
@@ -102,7 +196,8 @@
       delta.reduce((sum, value, index) => sum + value * projected[index], 0),
     );
     const distance = Math.sqrt(distanceSquared);
-    const percentile = percentileOf(model.reference_distances, distance);
+    const calibration = calibratedPercentile(model, values.age, distance);
+    const percentile = calibration.percentile;
 
     let status = "Typical anatomy";
     let statusClass = "status-routine";
@@ -121,25 +216,81 @@
       .map((value, index) => ({ label: model.feature_labels[index], value }))
       .sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
       .slice(0, 2)
-      .map((item) => `${item.label} ${item.value >= 0 ? "+" : ""}${item.value.toFixed(1)} SD`)
+      .map((item) => `${item.label.replace(/ vs age$/, "")} ${item.value >= 0 ? "+" : ""}${item.value.toFixed(1)} SD`)
       .join("; ");
 
+    const units = { AL: "mm", Mean_K: "D", ACD: "mm", LT: "mm", WTW: "mm", CCT: "mm" };
+    const labels = { AL: "AL", Mean_K: "Mean K", ACD: "ACD", LT: "LT", WTW: "WTW", CCT: "CCT" };
+    const profile = model.inputs.flatMap((name, index) => {
+      const reference = model.marginal_reference_values && model.marginal_reference_values[name];
+      if (!reference) return [];
+      return [{
+        name,
+        label: labels[name],
+        unit: units[name],
+        observed: source[name],
+        residual: residuals[name],
+        standardizedValue: vector[index],
+        marginalPercentile: (100 * lowerBound(reference, vector[index])) / (reference.length + 1),
+        q2_5: quantile(reference, 0.025),
+        q25: quantile(reference, 0.25),
+        q50: quantile(reference, 0.50),
+        q75: quantile(reference, 0.75),
+        q97_5: quantile(reference, 0.975),
+      }];
+    });
+
     return {
-      expectedAcd,
-      expectedLt,
-      adjustedAcd,
-      adjustedLt,
+      expectedAcd: expectedByAge(model, "ACD", values.age),
+      expectedLt: expectedByAge(model, "LT", values.age),
+      adjustedAcd: residuals.ACD,
+      adjustedLt: residuals.LT,
       distance,
       percentile,
       status,
       statusClass,
       dominant,
-      rarity: raritySummary(percentile, model.reference_distances.length),
+      rarity: raritySummary(
+        percentile,
+        calibration.tailProbability,
+        calibration.ageLocal,
+        model.reference_unit || null,
+      ),
+      effectiveN: calibration.effectiveN,
+      calibration,
+      profile,
       model,
+      coreSensitivity: null,
     };
   }
 
-  const api = { calculate, expectedByAge, percentileOf, raritySummary, selectModel, validate };
+  function calculate(bundle, values) {
+    const model = selectModel(bundle, values);
+    if (!model) throw new Error("No OOD model is available for this age.");
+    const result = calculateForModel(model, values);
+    if (model.tier === "Extended") {
+      const core = modelsForAge(bundle, values.age).find((candidate) => candidate.tier === "Core");
+      const coreResult = calculateForModel(core, values);
+      result.coreSensitivity = {
+        percentile: coreResult.percentile,
+        status: coreResult.status,
+        difference: result.percentile - coreResult.percentile,
+      };
+    }
+    return result;
+  }
+
+  const api = {
+    calculate,
+    calculateForModel,
+    calibratedPercentile,
+    expectedByAge,
+    percentileOf,
+    raritySummary,
+    selectModel,
+    tailExpandedPosition,
+    validate,
+  };
   root.BiometryOODCore = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 }(typeof globalThis !== "undefined" ? globalThis : this));

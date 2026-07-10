@@ -9,22 +9,20 @@ class BiometryOODTests(unittest.TestCase):
         cls.model = load_default_model()
 
     def test_model_provenance_and_size(self):
-        self.assertEqual(self.model.version, "age-stratified-v2.0.0")
-        self.assertEqual(len(self.model.models), 6)
+        self.assertEqual(self.model.version, "continuous-age-bilateral-v3.1.0")
+        self.assertEqual(len(self.model.models), 2)
         counts = {model.payload["model_key"]: len(model.reference_distances) for model in self.model.models}
         self.assertEqual(
             counts,
             {
-                "pediatric_core": 976,
-                "pediatric_extended": 967,
-                "young_adult_core": 317,
-                "young_adult_extended": 315,
-                "adult_core": 6876,
-                "adult_extended": 6874,
+                "bilateral_core": 1246,
+                "bilateral_extended": 1245,
             },
         )
         for model in self.model.models:
             self.assertEqual(model.reference_distances, sorted(model.reference_distances))
+            self.assertEqual(model.payload["reference_patients"], 681)
+            self.assertGreater(model.payload["reference_rows"], model.payload["reference_patients"])
 
     def test_mean_k_from_equal_radii(self):
         radius = 337.5 / 40.8
@@ -37,35 +35,44 @@ class BiometryOODTests(unittest.TestCase):
     def test_user_example_is_uncommon(self):
         result = self.model.score_values(80, 23.61, 40.80, 1.94, 5.58)
         self.assertEqual(result["OOD_Status"], "Uncommon anatomy")
-        self.assertAlmostEqual(result["OOD_Percentile"], 93.572, places=3)
-        self.assertIn("ACD vs age", result["OOD_Dominant_Deviation"])
-        self.assertEqual(result["OOD_Age_Stratum"], "Adult cataract-age")
+        self.assertAlmostEqual(result["OOD_Percentile"], 92.212, places=3)
+        self.assertIn("ACD -", result["OOD_Dominant_Deviation"])
+        self.assertEqual(result["OOD_Age_Stratum"], "Continuous age-adjusted bilateral")
         self.assertEqual(result["OOD_Model_Tier"], "Core")
         self.assertEqual(
             result["OOD_Reference_Context"],
-            "About 1 in 16 reference eyes is this unusual or more",
+            "About 1 in 13 patient-clustered calibration eyes is this unusual or more",
         )
+        self.assertGreater(result["OOD_Local_Calibration_Effective_N"], 350)
+        self.assertEqual(len(result["OOD_Feature_Profile"]), 4)
 
     def test_wtw_cct_select_extended_model(self):
         result = self.model.score_values(80, 23.61, 40.80, 1.94, 5.58, 10.99, 0.601)
         self.assertEqual(result["OOD_Model_Tier"], "Extended")
-        self.assertEqual(result["OOD_Model_Version"], "adult-extended-v2.0.0")
-        self.assertAlmostEqual(result["OOD_Percentile"], 96.392, places=3)
+        self.assertEqual(result["OOD_Model_Version"], "bilateral-extended-v3.1.0")
+        self.assertAlmostEqual(result["OOD_Percentile"], 95.725, places=3)
         self.assertEqual(
             result["OOD_Reference_Context"],
-            "About 1 in 28 reference eyes is this unusual or more",
+            "About 1 in 23 patient-clustered calibration eyes is this unusual or more",
         )
+        self.assertAlmostEqual(result["OOD_Core_Sensitivity_Percentile"], 92.212, places=3)
+        self.assertEqual(result["OOD_Core_Sensitivity_Status"], "Uncommon anatomy")
 
-    def test_age_selects_stratum(self):
-        pediatric = self.model.score_values(8, 23.05, 43.31, 3.55, 3.47)
-        young = self.model.score_values(25, 25.68, 43.30, 3.68, 3.52)
-        adult = self.model.score_values(40, 24.0, 43.6, 3.3, 4.2)
-        self.assertEqual(pediatric["OOD_Age_Stratum"], "Pediatric")
-        self.assertEqual(young["OOD_Age_Stratum"], "Young adult")
-        self.assertEqual(adult["OOD_Age_Stratum"], "Adult cataract-age")
-        self.assertEqual(self.model.select_model(17.999).stratum_label, "Pediatric")
-        self.assertEqual(self.model.select_model(18.0).stratum_label, "Young adult")
-        self.assertEqual(self.model.select_model(40.0).stratum_label, "Adult cataract-age")
+    def test_age_is_continuous_across_former_boundaries(self):
+        values = (23.05, 43.31, 3.55, 3.47)
+        before_18 = self.model.score_values(17.99, *values)
+        after_18 = self.model.score_values(18.0, *values)
+        self.assertLess(abs(before_18["OOD_Percentile"] - after_18["OOD_Percentile"]), 1.0)
+        values_40 = (24.0, 43.6, 3.3, 4.2)
+        before_40 = self.model.score_values(39.99, *values_40)
+        after_40 = self.model.score_values(40.0, *values_40)
+        self.assertLess(abs(before_40["OOD_Percentile"] - after_40["OOD_Percentile"]), 0.1)
+        self.assertEqual(self.model.select_model(8).payload["model_key"], "bilateral_core")
+        self.assertEqual(self.model.select_model(80).payload["model_key"], "bilateral_core")
+
+    def test_age_local_percentile_never_reaches_100(self):
+        result = self.model.score_values(25, 38, 65, 0.8, 8)
+        self.assertLess(result["OOD_Percentile"], 100)
 
     def test_missing_date_retains_calculated_mean_k(self):
         result = self.model.score_row(

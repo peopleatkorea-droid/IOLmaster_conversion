@@ -1,0 +1,1139 @@
+{
+  "bundle_version": "continuous-age-calibrated-v3.0.0",
+  "trained_at_utc": "2026-07-10T12:29:16+00:00",
+  "source": {
+    "filename": "IOLMaster700_corrected_3.xlsx",
+    "sha256": "12dda673d513a2b4e19d921a34fd06596a46ef21e41d2e1cce12121bd8a6e52a",
+    "worksheet": "Corrected_All_Eyes"
+  },
+  "software": {
+    "numpy": "2.0.2",
+    "scikit_learn": "1.6.1"
+  },
+  "patient_level_design": {
+    "split_seed": "biometry-ood-v3-final-split-20260710",
+    "eye_selection_seed": "biometry-ood-v3-eye-20260710",
+    "split_ratios": {
+      "derivation": 0.55,
+      "tuning": 0.15,
+      "calibration": 0.15,
+      "test": 0.15
+    },
+    "one_eye_per_patient": true,
+    "exam_selection": "Latest valid examination per patient-eye before deterministic eye selection."
+  },
+  "models": [
+    {
+      "model_key": "continuous_core",
+      "model_version": "continuous-core-v3.0.0",
+      "inputs": [
+        "AL",
+        "Mean_K",
+        "ACD",
+        "LT"
+      ],
+      "filter_counts": {
+        "source_rows": 12615,
+        "excluded_test_or_demo": 2,
+        "excluded_missing_or_invalid_date": 0,
+        "excluded_age": 0,
+        "excluded_missing_input": 1161,
+        "excluded_input_range": 973,
+        "superseded_repeat_exam": 2302,
+        "additional_eye_not_selected": 3676,
+        "eligible_patients": 4501,
+        "eligible_eyes_after_selection": 4501
+      },
+      "split_counts": {
+        "derivation": 2490,
+        "tuning": 628,
+        "calibration": 681,
+        "test": 702
+      },
+      "split_age_band_counts": {
+        "derivation": {
+          "2-17": 268,
+          "18-39": 87,
+          "40-59": 360,
+          "60-79": 1427,
+          "80-100": 348
+        },
+        "tuning": {
+          "2-17": 63,
+          "18-39": 29,
+          "40-59": 98,
+          "60-79": 348,
+          "80-100": 90
+        },
+        "calibration": {
+          "2-17": 85,
+          "18-39": 22,
+          "40-59": 92,
+          "60-79": 386,
+          "80-100": 96
+        },
+        "test": {
+          "2-17": 83,
+          "18-39": 27,
+          "40-59": 101,
+          "60-79": 393,
+          "80-100": 98
+        }
+      },
+      "age_adjustment": {
+        "method": "Huber piecewise-linear spline",
+        "basis": "linear hinge spline",
+        "huber_tuning": 1.345,
+        "age_center_years": 50.0,
+        "age_scale_years": 10.0,
+        "knots_years": [
+          5.0,
+          10.0,
+          15.0,
+          18.0,
+          30.0,
+          40.0,
+          55.0,
+          70.0,
+          85.0
+        ],
+        "dispersion_method": "Continuous nearest-age MAD scale interpolation",
+        "features": {
+          "AL": {
+            "coefficients": [
+              51.18568108834755,
+              6.429562538924671,
+              -3.0339664642260575,
+              -0.1604807158856642,
+              -6.5780764987564355,
+              4.770520872176989,
+              -1.8795386090289445,
+              -0.31757492277868893,
+              0.19052680867945904,
+              0.39689673030235323,
+              0.19624567957704905
+            ],
+            "residual_scale": 1.0269053790868536,
+            "scale_method": "Linear interpolation of MAD scales from 250 nearest-age derivation patients",
+            "scale_anchors_years": [
+              2.0,
+              5.0,
+              8.0,
+              11.0,
+              14.0,
+              17.0,
+              20.0,
+              25.0,
+              30.0,
+              35.0,
+              40.0,
+              50.0,
+              60.0,
+              70.0,
+              80.0,
+              90.0,
+              100.0
+            ],
+            "scale_values": [
+              1.242023101901641,
+              1.242023101901641,
+              1.242023101901641,
+              1.2670366950168443,
+              1.2788818584460595,
+              1.327571266713812,
+              1.3503615879236832,
+              1.4218476071077,
+              1.874079256972197,
+              1.7452883793513412,
+              1.8029035493066807,
+              1.8326884442429834,
+              1.3290494343601138,
+              0.8495457323169358,
+              0.7518710233237123,
+              0.7069147370033911,
+              0.702134292706858
+            ],
+            "iterations": 26
+          },
+          "Mean_K": {
+            "coefficients": [
+              45.63326098327838,
+              0.47918756910371907,
+              -0.7546548262154411,
+              -0.5181652696639097,
+              3.7957523002727074,
+              -4.391892522866343,
+              2.0707222620998476,
+              -0.36241802817299185,
+              -0.06837052383525702,
+              -0.23788394017587136,
+              -0.2575632532496804
+            ],
+            "residual_scale": 1.4746509308635514,
+            "scale_method": "Linear interpolation of MAD scales from 250 nearest-age derivation patients",
+            "scale_anchors_years": [
+              2.0,
+              5.0,
+              8.0,
+              11.0,
+              14.0,
+              17.0,
+              20.0,
+              25.0,
+              30.0,
+              35.0,
+              40.0,
+              50.0,
+              60.0,
+              70.0,
+              80.0,
+              90.0,
+              100.0
+            ],
+            "scale_values": [
+              1.526945888329668,
+              1.526945888329668,
+              1.526945888329668,
+              1.5152567997748527,
+              1.509111726527873,
+              1.4689895217517632,
+              1.5521324407812571,
+              1.5775899814255292,
+              1.7109333091310968,
+              1.8384018354602902,
+              1.9778557849182417,
+              1.837611712738187,
+              1.453235291857479,
+              1.3650132093131409,
+              1.570974602276605,
+              1.2169010966906162,
+              1.200661536458268
+            ],
+            "iterations": 20
+          },
+          "ACD": {
+            "coefficients": [
+              9.800911985640228,
+              1.4263054311665404,
+              -0.746437238215173,
+              -0.8725986423356764,
+              0.4557719506827747,
+              -0.33506319042806143,
+              -0.10162410740656527,
+              0.12408549612101578,
+              -0.12867261088814896,
+              0.03173467306223053,
+              0.09564970295521562
+            ],
+            "residual_scale": 0.3542452033322709,
+            "scale_method": "Linear interpolation of MAD scales from 250 nearest-age derivation patients",
+            "scale_anchors_years": [
+              2.0,
+              5.0,
+              8.0,
+              11.0,
+              14.0,
+              17.0,
+              20.0,
+              25.0,
+              30.0,
+              35.0,
+              40.0,
+              50.0,
+              60.0,
+              70.0,
+              80.0,
+              90.0,
+              100.0
+            ],
+            "scale_values": [
+              0.2596648344912758,
+              0.2596648344912758,
+              0.2596648344912758,
+              0.25412384910136504,
+              0.26138927439004656,
+              0.26475254328214937,
+              0.27308521750967196,
+              0.2734216042712858,
+              0.32407089912197945,
+              0.32633494057152485,
+              0.33151595471321604,
+              0.3550113508470128,
+              0.399965418732787,
+              0.38221571950582084,
+              0.33202736759233886,
+              0.38959099084826637,
+              0.38959099084826637
+            ],
+            "iterations": 17
+          },
+          "LT": {
+            "coefficients": [
+              -2.1222384009811273,
+              -1.2722240128835118,
+              0.7169389264765931,
+              0.9972118470138321,
+              -0.8095491702350532,
+              0.521439492009577,
+              0.2514418574136495,
+              -0.25107611463909074,
+              0.04151923309612136,
+              0.011509295352111449,
+              -0.13176796499392654
+            ],
+            "residual_scale": 0.3235465511121207,
+            "scale_method": "Linear interpolation of MAD scales from 250 nearest-age derivation patients",
+            "scale_anchors_years": [
+              2.0,
+              5.0,
+              8.0,
+              11.0,
+              14.0,
+              17.0,
+              20.0,
+              25.0,
+              30.0,
+              35.0,
+              40.0,
+              50.0,
+              60.0,
+              70.0,
+              80.0,
+              90.0,
+              100.0
+            ],
+            "scale_values": [
+              0.18383314157490363,
+              0.18383314157490363,
+              0.18383314157490363,
+              0.18018532212662378,
+              0.1845627332924399,
+              0.18816851966683823,
+              0.19200214687783254,
+              0.19901520163830505,
+              0.25632254522429654,
+              0.308171461903719,
+              0.3446659081483481,
+              0.36881798953773837,
+              0.32376784029995065,
+              0.3314430981532656,
+              0.3738684275993651,
+              0.3863915487420156,
+              0.38574734550865314
+            ],
+            "iterations": 14
+          }
+        }
+      },
+      "covariance": {
+        "method": "Reweighted Minimum Covariance Determinant; support_fraction 0.75; eigenvalue floor 1e-8 of maximum eigenvalue",
+        "raw_support_fraction": 0.7497991967871486,
+        "reweighted_support_fraction": 0.9120481927710843,
+        "raw_minimum_eigenvalue": 0.21870405058211376,
+        "regularized_minimum_eigenvalue": 0.21870405058211376,
+        "maximum_eigenvalue": 1.8633875969625782,
+        "eigenvalue_floor": 1.8633875969625782e-08,
+        "condition_number_2": 8.520132992520674
+      },
+      "calibration": {
+        "method": "Patient-held-out age-local empirical calibration; one deterministic eye per patient; Gaussian age kernel bandwidth 8 years selected in a separate tuning set; add-one upper-tail smoothing",
+        "distance_thresholds": {
+          "p90": 3.5002905728286926,
+          "p97_5": 5.390543012554555
+        },
+        "bandwidth_selection": {
+          "selected": {
+            "bandwidth_years": 8.0,
+            "objective": 0.1948928953322496,
+            "overall_ks": 0.05452160707477549,
+            "mean_age_band_ks": 0.1403712882574741,
+            "age_band_ks": {
+              "2-17": 0.1819160636932039,
+              "18-39": 0.29807644418097057,
+              "40-59": 0.06125105641128148,
+              "60-79": 0.0995599663511586,
+              "80-100": 0.06105291065075594
+            }
+          },
+          "candidates": [
+            {
+              "bandwidth_years": 4.0,
+              "objective": 0.19692957436063147,
+              "overall_ks": 0.059231469881151966,
+              "mean_age_band_ks": 0.1376981044794795,
+              "age_band_ks": {
+                "2-17": 0.18716797235712979,
+                "18-39": 0.2645283994374892,
+                "40-59": 0.06168286136768475,
+                "60-79": 0.09641001769965174,
+                "80-100": 0.0787012715354421
+              }
+            },
+            {
+              "bandwidth_years": 6.0,
+              "objective": 0.19545570314084243,
+              "overall_ks": 0.056568424145552076,
+              "mean_age_band_ks": 0.13888727899529035,
+              "age_band_ks": {
+                "2-17": 0.18566154669850976,
+                "18-39": 0.2939397690907599,
+                "40-59": 0.051251213598251355,
+                "60-79": 0.0976596160932417,
+                "80-100": 0.06592424949568906
+              }
+            },
+            {
+              "bandwidth_years": 8.0,
+              "objective": 0.1948928953322496,
+              "overall_ks": 0.05452160707477549,
+              "mean_age_band_ks": 0.1403712882574741,
+              "age_band_ks": {
+                "2-17": 0.1819160636932039,
+                "18-39": 0.29807644418097057,
+                "40-59": 0.06125105641128148,
+                "60-79": 0.0995599663511586,
+                "80-100": 0.06105291065075594
+              }
+            },
+            {
+              "bandwidth_years": 10.0,
+              "objective": 0.19830899056354306,
+              "overall_ks": 0.0557412707545909,
+              "mean_age_band_ks": 0.14256771980895216,
+              "age_band_ks": {
+                "2-17": 0.18141266960358549,
+                "18-39": 0.3038962831950519,
+                "40-59": 0.06956246368392732,
+                "60-79": 0.10230397666278329,
+                "80-100": 0.05566320589941284
+              }
+            },
+            {
+              "bandwidth_years": 12.0,
+              "objective": 0.20007671843996114,
+              "overall_ks": 0.05478941139154214,
+              "mean_age_band_ks": 0.145287307048419,
+              "age_band_ks": {
+                "2-17": 0.18266872422388925,
+                "18-39": 0.307476812708803,
+                "40-59": 0.07653733080319547,
+                "60-79": 0.10406029302638448,
+                "80-100": 0.05569337447982284
+              }
+            }
+          ]
+        }
+      },
+      "independent_test": {
+        "n": 702,
+        "percentile_median": 47.26779181437857,
+        "percentile_p90": 89.21784170112036,
+        "percentile_p97_5": 96.43890312330416,
+        "category_proportions": {
+          "typical": 0.9131054131054132,
+          "uncommon": 0.07264957264957266,
+          "rare": 0.014245014245014245
+        },
+        "ks_distance_from_uniform": 0.03886183188749123
+      },
+      "independent_test_by_age": {
+        "2-17": {
+          "n": 83,
+          "percentile_median": 40.32168346324405,
+          "percentile_p90": 87.3362313528092,
+          "percentile_p97_5": 93.02362432111752,
+          "category_proportions": {
+            "typical": 0.927710843373494,
+            "uncommon": 0.060240963855421686,
+            "rare": 0.012048192771084338
+          },
+          "ks_distance_from_uniform": 0.12406546878426605
+        },
+        "18-39": {
+          "n": 27,
+          "percentile_median": 51.39036174772742,
+          "percentile_p90": 84.77794934145652,
+          "percentile_p97_5": 93.10867015544662,
+          "category_proportions": {
+            "typical": 0.9259259259259259,
+            "uncommon": 0.07407407407407407,
+            "rare": 0.0
+          },
+          "ks_distance_from_uniform": 0.190169537823774
+        },
+        "40-59": {
+          "n": 101,
+          "percentile_median": 47.268545866444775,
+          "percentile_p90": 90.7777594771314,
+          "percentile_p97_5": 96.52041709468793,
+          "category_proportions": {
+            "typical": 0.8811881188118812,
+            "uncommon": 0.10891089108910891,
+            "rare": 0.009900990099009901
+          },
+          "ks_distance_from_uniform": 0.089827574590122
+        },
+        "60-79": {
+          "n": 393,
+          "percentile_median": 46.20500625220146,
+          "percentile_p90": 87.67100971748289,
+          "percentile_p97_5": 97.05434065254468,
+          "category_proportions": {
+            "typical": 0.926208651399491,
+            "uncommon": 0.05343511450381679,
+            "rare": 0.020356234096692113
+          },
+          "ks_distance_from_uniform": 0.04542291503537191
+        },
+        "80-100": {
+          "n": 98,
+          "percentile_median": 54.27418685118492,
+          "percentile_p90": 91.7360059328702,
+          "percentile_p97_5": 95.49205707051891,
+          "category_proportions": {
+            "typical": 0.8775510204081632,
+            "uncommon": 0.12244897959183673,
+            "rare": 0.0
+          },
+          "ks_distance_from_uniform": 0.06294059102689076
+        }
+      },
+      "boundary_continuity": {
+        "18": {
+          "n": 11,
+          "median_absolute_percentile_change": 0.00538864075606682,
+          "p90_absolute_percentile_change": 0.0074312490316543744,
+          "maximum_absolute_percentile_change": 0.009634225803822005
+        },
+        "40": {
+          "n": 11,
+          "median_absolute_percentile_change": 0.006059268200381496,
+          "p90_absolute_percentile_change": 0.017408845158541908,
+          "maximum_absolute_percentile_change": 0.05539584176317902
+        }
+      }
+    },
+    {
+      "model_key": "continuous_extended",
+      "model_version": "continuous-extended-v3.0.0",
+      "inputs": [
+        "AL",
+        "Mean_K",
+        "ACD",
+        "LT",
+        "WTW",
+        "CCT"
+      ],
+      "filter_counts": {
+        "source_rows": 12615,
+        "excluded_test_or_demo": 2,
+        "excluded_missing_or_invalid_date": 0,
+        "excluded_age": 0,
+        "excluded_missing_input": 1195,
+        "excluded_input_range": 970,
+        "superseded_repeat_exam": 2284,
+        "additional_eye_not_selected": 3666,
+        "eligible_patients": 4498,
+        "eligible_eyes_after_selection": 4498
+      },
+      "split_counts": {
+        "derivation": 2487,
+        "tuning": 628,
+        "calibration": 681,
+        "test": 702
+      },
+      "split_age_band_counts": {
+        "derivation": {
+          "2-17": 265,
+          "18-39": 87,
+          "40-59": 360,
+          "60-79": 1427,
+          "80-100": 348
+        },
+        "tuning": {
+          "2-17": 63,
+          "18-39": 29,
+          "40-59": 98,
+          "60-79": 348,
+          "80-100": 90
+        },
+        "calibration": {
+          "2-17": 85,
+          "18-39": 22,
+          "40-59": 92,
+          "60-79": 386,
+          "80-100": 96
+        },
+        "test": {
+          "2-17": 83,
+          "18-39": 27,
+          "40-59": 101,
+          "60-79": 393,
+          "80-100": 98
+        }
+      },
+      "age_adjustment": {
+        "method": "Huber piecewise-linear spline",
+        "basis": "linear hinge spline",
+        "huber_tuning": 1.345,
+        "age_center_years": 50.0,
+        "age_scale_years": 10.0,
+        "knots_years": [
+          5.0,
+          10.0,
+          15.0,
+          18.0,
+          30.0,
+          40.0,
+          55.0,
+          70.0,
+          85.0
+        ],
+        "dispersion_method": "Continuous nearest-age MAD scale interpolation",
+        "features": {
+          "AL": {
+            "coefficients": [
+              49.85738438482279,
+              6.133202877044892,
+              -2.7537356096435723,
+              -0.13545489472847974,
+              -6.59319642441003,
+              4.776905576665021,
+              -1.8797638320179244,
+              -0.31728357144226776,
+              0.19008021519490986,
+              0.39717056093677394,
+              0.19595924076096274
+            ],
+            "residual_scale": 1.0281426540829142,
+            "scale_method": "Linear interpolation of MAD scales from 250 nearest-age derivation patients",
+            "scale_anchors_years": [
+              2.0,
+              5.0,
+              8.0,
+              11.0,
+              14.0,
+              17.0,
+              20.0,
+              25.0,
+              30.0,
+              35.0,
+              40.0,
+              50.0,
+              60.0,
+              70.0,
+              80.0,
+              90.0,
+              100.0
+            ],
+            "scale_values": [
+              1.2476146410391693,
+              1.2476146410391693,
+              1.2476146410391693,
+              1.2531495411824798,
+              1.2601995244579822,
+              1.3499467688680205,
+              1.3520548427756511,
+              1.4239401599322072,
+              1.8742021412789835,
+              1.7451157849938346,
+              1.8029383824038152,
+              1.8326677664283482,
+              1.3290424663880174,
+              0.8495553188263053,
+              0.7518730384172945,
+              0.7069805012849422,
+              0.7022402106058363
+            ],
+            "iterations": 23
+          },
+          "Mean_K": {
+            "coefficients": [
+              46.50230946193873,
+              0.6638558596747935,
+              -1.0353743609269623,
+              -0.3941273287740757,
+              3.7523303603623877,
+              -4.375979451953215,
+              2.070132704634484,
+              -0.3622570653238234,
+              -0.06834471884495853,
+              -0.2379856999147955,
+              -0.25732395509859635
+            ],
+            "residual_scale": 1.47621924096032,
+            "scale_method": "Linear interpolation of MAD scales from 250 nearest-age derivation patients",
+            "scale_anchors_years": [
+              2.0,
+              5.0,
+              8.0,
+              11.0,
+              14.0,
+              17.0,
+              20.0,
+              25.0,
+              30.0,
+              35.0,
+              40.0,
+              50.0,
+              60.0,
+              70.0,
+              80.0,
+              90.0,
+              100.0
+            ],
+            "scale_values": [
+              1.5009817477344132,
+              1.5009817477344132,
+              1.5009817477344132,
+              1.5154432292735678,
+              1.4805669435641007,
+              1.4760842976815383,
+              1.5618902676775968,
+              1.578227166571683,
+              1.7138944869681485,
+              1.8383593812979862,
+              1.9778564544096333,
+              1.83759045403139,
+              1.4532298243533057,
+              1.3650147658422767,
+              1.5709794888018753,
+              1.2169042269089827,
+              1.2006232203082436
+            ],
+            "iterations": 21
+          },
+          "ACD": {
+            "coefficients": [
+              9.566506654314582,
+              1.3737315417610545,
+              -0.6998204353018121,
+              -0.8642974378857371,
+              0.4520872574939469,
+              -0.3336935743872056,
+              -0.10166089091636264,
+              0.12406765565391482,
+              -0.12861351293788498,
+              0.03169142115718523,
+              0.0956583920171193
+            ],
+            "residual_scale": 0.35443578004746873,
+            "scale_method": "Linear interpolation of MAD scales from 250 nearest-age derivation patients",
+            "scale_anchors_years": [
+              2.0,
+              5.0,
+              8.0,
+              11.0,
+              14.0,
+              17.0,
+              20.0,
+              25.0,
+              30.0,
+              35.0,
+              40.0,
+              50.0,
+              60.0,
+              70.0,
+              80.0,
+              90.0,
+              100.0
+            ],
+            "scale_values": [
+              0.2598244433201619,
+              0.2598244433201619,
+              0.2598244433201619,
+              0.2563968255991181,
+              0.26257229118782244,
+              0.2673736395966451,
+              0.2729931215886722,
+              0.27357590355095807,
+              0.32392144830504105,
+              0.3263592979458584,
+              0.33151134611084854,
+              0.3550100060189458,
+              0.39996960208300336,
+              0.3822162804622064,
+              0.3320294070889832,
+              0.3895905758704758,
+              0.3895905758704758
+            ],
+            "iterations": 14
+          },
+          "LT": {
+            "coefficients": [
+              -1.975720654942279,
+              -1.239347912708358,
+              0.6878177316170913,
+              0.9920673792575754,
+              -0.8071371721880378,
+              0.520357910269986,
+              0.25157096202877566,
+              -0.2511831188007855,
+              0.04154611172911716,
+              0.011528630585704474,
+              -0.13176462274971826
+            ],
+            "residual_scale": 0.32418655791332657,
+            "scale_method": "Linear interpolation of MAD scales from 250 nearest-age derivation patients",
+            "scale_anchors_years": [
+              2.0,
+              5.0,
+              8.0,
+              11.0,
+              14.0,
+              17.0,
+              20.0,
+              25.0,
+              30.0,
+              35.0,
+              40.0,
+              50.0,
+              60.0,
+              70.0,
+              80.0,
+              90.0,
+              100.0
+            ],
+            "scale_values": [
+              0.18577597159280992,
+              0.18577597159280992,
+              0.18577597159280992,
+              0.18279615830354448,
+              0.1877260954405842,
+              0.1889358957924419,
+              0.19189685025928652,
+              0.1987233946979799,
+              0.25632936836922987,
+              0.3081667175220348,
+              0.3447010071768085,
+              0.36996512586114794,
+              0.3237656983719538,
+              0.3314422263767698,
+              0.3738669482754536,
+              0.38640332945749717,
+              0.38573873888203636
+            ],
+            "iterations": 15
+          },
+          "WTW": {
+            "coefficients": [
+              8.449706347447185,
+              -0.8207841326724973,
+              0.9114469196364688,
+              -0.2585596394520765,
+              0.42034059654907596,
+              -0.2548368522989655,
+              -0.047200519566923047,
+              -0.07526591615897865,
+              0.028528165989523235,
+              0.08719382103684704,
+              0.004663637023167063
+            ],
+            "residual_scale": 0.40370680934868824,
+            "scale_method": "Linear interpolation of MAD scales from 250 nearest-age derivation patients",
+            "scale_anchors_years": [
+              2.0,
+              5.0,
+              8.0,
+              11.0,
+              14.0,
+              17.0,
+              20.0,
+              25.0,
+              30.0,
+              35.0,
+              40.0,
+              50.0,
+              60.0,
+              70.0,
+              80.0,
+              90.0,
+              100.0
+            ],
+            "scale_values": [
+              0.4006774736164731,
+              0.4006774736164731,
+              0.4006774736164731,
+              0.41095580658655334,
+              0.3733250583660783,
+              0.4143843979122966,
+              0.4090614819198641,
+              0.42608848658128645,
+              0.4110454111781969,
+              0.4401312766462403,
+              0.4195524604412769,
+              0.4335218189480072,
+              0.4020773675528375,
+              0.4119923117105427,
+              0.4445683686703837,
+              0.34811939805385556,
+              0.3476655527335388
+            ],
+            "iterations": 14
+          },
+          "CCT": {
+            "coefficients": [
+              0.9525498375703859,
+              0.09069455477092649,
+              -0.07147113652437742,
+              -0.022904833697300418,
+              0.04659556700340726,
+              -0.06929041181291055,
+              0.03780924566026302,
+              -0.013449577137305664,
+              0.001897764185188274,
+              -0.0073219241040468385,
+              0.006687680119332737
+            ],
+            "residual_scale": 0.033728866566076585,
+            "scale_method": "Linear interpolation of MAD scales from 250 nearest-age derivation patients",
+            "scale_anchors_years": [
+              2.0,
+              5.0,
+              8.0,
+              11.0,
+              14.0,
+              17.0,
+              20.0,
+              25.0,
+              30.0,
+              35.0,
+              40.0,
+              50.0,
+              60.0,
+              70.0,
+              80.0,
+              90.0,
+              100.0
+            ],
+            "scale_values": [
+              0.029060297000411912,
+              0.029060297000411912,
+              0.029060297000411912,
+              0.03055943004886531,
+              0.030884539279931403,
+              0.03015240326576973,
+              0.030612017180672805,
+              0.033561146899172604,
+              0.042804052346375264,
+              0.04392949220344559,
+              0.04709609868157747,
+              0.039077855373809166,
+              0.030592377473041894,
+              0.03566261469956641,
+              0.03137600411670184,
+              0.038429367603778526,
+              0.038429367603778526
+            ],
+            "iterations": 14
+          }
+        }
+      },
+      "covariance": {
+        "method": "Reweighted Minimum Covariance Determinant; support_fraction 0.75; eigenvalue floor 1e-8 of maximum eigenvalue",
+        "raw_support_fraction": 0.7498994772818657,
+        "reweighted_support_fraction": 0.9131483715319663,
+        "raw_minimum_eigenvalue": 0.1940955875802331,
+        "regularized_minimum_eigenvalue": 0.1940955875802331,
+        "maximum_eigenvalue": 2.1540316894397074,
+        "eigenvalue_floor": 2.1540316894397075e-08,
+        "condition_number_2": 11.097788034719215
+      },
+      "calibration": {
+        "method": "Patient-held-out age-local empirical calibration; one deterministic eye per patient; Gaussian age kernel bandwidth 4 years selected in a separate tuning set; add-one upper-tail smoothing",
+        "distance_thresholds": {
+          "p90": 4.0944410791316,
+          "p97_5": 5.972534849011483
+        },
+        "bandwidth_selection": {
+          "selected": {
+            "bandwidth_years": 4.0,
+            "objective": 0.23848298786841587,
+            "overall_ks": 0.07333773090505918,
+            "mean_age_band_ks": 0.1651452569633567,
+            "age_band_ks": {
+              "2-17": 0.21783517399513996,
+              "18-39": 0.31679313182081825,
+              "40-59": 0.07358049042850667,
+              "60-79": 0.14138423488702306,
+              "80-100": 0.07613325368529555
+            }
+          },
+          "candidates": [
+            {
+              "bandwidth_years": 4.0,
+              "objective": 0.23848298786841587,
+              "overall_ks": 0.07333773090505918,
+              "mean_age_band_ks": 0.1651452569633567,
+              "age_band_ks": {
+                "2-17": 0.21783517399513996,
+                "18-39": 0.31679313182081825,
+                "40-59": 0.07358049042850667,
+                "60-79": 0.14138423488702306,
+                "80-100": 0.07613325368529555
+              }
+            },
+            {
+              "bandwidth_years": 6.0,
+              "objective": 0.24335150080490695,
+              "overall_ks": 0.07242535488745766,
+              "mean_age_band_ks": 0.17092614591744928,
+              "age_band_ks": {
+                "2-17": 0.21949290405419375,
+                "18-39": 0.3480245076491931,
+                "40-59": 0.08591576823373859,
+                "60-79": 0.1425256550558448,
+                "80-100": 0.05867189459427616
+              }
+            },
+            {
+              "bandwidth_years": 8.0,
+              "objective": 0.24975193630061548,
+              "overall_ks": 0.07100076055977572,
+              "mean_age_band_ks": 0.17875117574083976,
+              "age_band_ks": {
+                "2-17": 0.21989986683683127,
+                "18-39": 0.3658861847268726,
+                "40-59": 0.09293644139693469,
+                "60-79": 0.14110208935457114,
+                "80-100": 0.0739312963889891
+              }
+            },
+            {
+              "bandwidth_years": 10.0,
+              "objective": 0.25168635609096013,
+              "overall_ks": 0.06747316584720786,
+              "mean_age_band_ks": 0.18421319024375227,
+              "age_band_ks": {
+                "2-17": 0.22014283525105482,
+                "18-39": 0.3866860637108942,
+                "40-59": 0.09572846188093775,
+                "60-79": 0.14106932954879653,
+                "80-100": 0.07743926082707797
+              }
+            },
+            {
+              "bandwidth_years": 12.0,
+              "objective": 0.25497904493668166,
+              "overall_ks": 0.06802463019838328,
+              "mean_age_band_ks": 0.1869544147382984,
+              "age_band_ks": {
+                "2-17": 0.21996036538713504,
+                "18-39": 0.394019365446314,
+                "40-59": 0.09784212411887072,
+                "60-79": 0.139902984301861,
+                "80-100": 0.08304723443731132
+              }
+            }
+          ]
+        }
+      },
+      "independent_test": {
+        "n": 702,
+        "percentile_median": 47.649850049099946,
+        "percentile_p90": 87.62670458760792,
+        "percentile_p97_5": 95.80942134337367,
+        "category_proportions": {
+          "typical": 0.9273504273504274,
+          "uncommon": 0.05982905982905983,
+          "rare": 0.01282051282051282
+        },
+        "ks_distance_from_uniform": 0.0432841815925466
+      },
+      "independent_test_by_age": {
+        "2-17": {
+          "n": 83,
+          "percentile_median": 49.10444053363916,
+          "percentile_p90": 84.96765479392637,
+          "percentile_p97_5": 93.86744457211731,
+          "category_proportions": {
+            "typical": 0.963855421686747,
+            "uncommon": 0.024096385542168676,
+            "rare": 0.012048192771084338
+          },
+          "ks_distance_from_uniform": 0.09624767712126558
+        },
+        "18-39": {
+          "n": 27,
+          "percentile_median": 52.665164642064525,
+          "percentile_p90": 76.43091686744904,
+          "percentile_p97_5": 85.4715619401301,
+          "category_proportions": {
+            "typical": 0.9629629629629629,
+            "uncommon": 0.037037037037037035,
+            "rare": 0.0
+          },
+          "ks_distance_from_uniform": 0.15521173492660068
+        },
+        "40-59": {
+          "n": 101,
+          "percentile_median": 47.80740636892827,
+          "percentile_p90": 92.08863181602786,
+          "percentile_p97_5": 95.60409896939561,
+          "category_proportions": {
+            "typical": 0.8712871287128713,
+            "uncommon": 0.12871287128712872,
+            "rare": 0.0
+          },
+          "ks_distance_from_uniform": 0.0810189522634529
+        },
+        "60-79": {
+          "n": 393,
+          "percentile_median": 42.21928821001832,
+          "percentile_p90": 86.69747061061265,
+          "percentile_p97_5": 97.1747896056138,
+          "category_proportions": {
+            "typical": 0.926208651399491,
+            "uncommon": 0.05597964376590331,
+            "rare": 0.017811704834605598
+          },
+          "ks_distance_from_uniform": 0.08092328005416466
+        },
+        "80-100": {
+          "n": 98,
+          "percentile_median": 55.38308985642953,
+          "percentile_p90": 88.6025450055669,
+          "percentile_p97_5": 93.9088038957234,
+          "category_proportions": {
+            "typical": 0.9489795918367347,
+            "uncommon": 0.04081632653061224,
+            "rare": 0.01020408163265306
+          },
+          "ks_distance_from_uniform": 0.07455508312098236
+        }
+      },
+      "boundary_continuity": {
+        "18": {
+          "n": 11,
+          "median_absolute_percentile_change": 0.01616494412090219,
+          "p90_absolute_percentile_change": 0.07514143792514005,
+          "maximum_absolute_percentile_change": 0.08561979187167523
+        },
+        "40": {
+          "n": 11,
+          "median_absolute_percentile_change": 0.025267439267526726,
+          "p90_absolute_percentile_change": 0.034372287421177816,
+          "maximum_absolute_percentile_change": 0.06695097404493033
+        }
+      }
+    }
+  ],
+  "core_extended_independent_test_agreement": {
+    "n_same_patient_and_eye": 701,
+    "pearson_correlation": 0.827749661383169,
+    "spearman_correlation": 0.8253623726091629,
+    "category_agreement": 0.9472182596291013,
+    "linearly_weighted_kappa": 0.6963911552283181,
+    "rare_classification_changed": 0.0042796005706134095,
+    "median_absolute_percentile_difference": 9.088701902107658,
+    "maximum_absolute_percentile_difference": 68.10191993781494
+  },
+  "limitations": [
+    "Single-center retrospective institutional reference distribution.",
+    "Clinical indication, phakic status, prior refractive surgery, and device quality warnings are not verified by EMR.",
+    "Age adjustment removes cross-sectional institutional age trends and must not be interpreted as longitudinal biological change.",
+    "The calibration set is internally independent but external-center and other-biometer validation remain required.",
+    "OOD percentile measures anatomical rarity, not postoperative prediction error or measurement failure.",
+    "The 90th and 97.5th percentile categories are prespecified descriptive labels, not clinical decision thresholds."
+  ]
+}

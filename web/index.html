@@ -27,7 +27,7 @@
             <h2 id="input-heading">Biometry inputs</h2>
           </div>
           <div class="actions secondary-actions">
-            <button type="button" class="button button-secondary" id="example-button">Load example</button>
+            <button type="button" class="button button-secondary" id="example-button" disabled>Random case</button>
             <button type="button" class="button button-quiet" id="reset-button">Reset</button>
           </div>
         </div>
@@ -40,23 +40,23 @@
             </label>
             <label>
               <span>Axial length <small>mm</small></span>
-              <input id="al" name="al" type="number" min="18" max="38" step="0.01" inputmode="decimal" required>
+              <input id="al" name="al" type="number" min="14" max="38" step="0.001" inputmode="decimal" required>
             </label>
             <label>
               <span>Mean K <small>D</small></span>
-              <input id="mean-k" name="meanK" type="number" min="30" max="60" step="0.01" inputmode="decimal" required>
+              <input id="mean-k" name="meanK" type="number" min="30" max="65" step="0.01" inputmode="decimal" required>
             </label>
             <label>
               <span>ACD <small>mm</small></span>
-              <input id="acd" name="acd" type="number" min="0.8" max="6" step="0.01" inputmode="decimal" required>
+              <input id="acd" name="acd" type="number" min="0.8" max="6" step="0.001" inputmode="decimal" required>
             </label>
             <label>
               <span>Lens thickness <small>mm</small></span>
-              <input id="lt" name="lt" type="number" min="2" max="8" step="0.01" inputmode="decimal" required>
+              <input id="lt" name="lt" type="number" min="2" max="8" step="0.001" inputmode="decimal" required>
             </label>
             <label>
               <span>WTW <small>mm, optional</small></span>
-              <input id="wtw" name="wtw" type="number" min="8" max="16" step="0.01" inputmode="decimal">
+              <input id="wtw" name="wtw" type="number" min="8" max="16" step="0.001" inputmode="decimal">
             </label>
             <label>
               <span>CCT <small>mm, optional</small></span>
@@ -65,7 +65,8 @@
           </div>
           <div class="form-footer">
             <div class="form-feedback">
-              <p class="model-preview" id="model-preview">Age selects the reference model automatically.</p>
+              <p class="example-caption" id="example-caption" hidden></p>
+              <p class="model-preview" id="model-preview">Age is modeled continuously; optional inputs select Core or Extended.</p>
               <p class="validation-message" id="validation-message" aria-live="polite"></p>
             </div>
             <button type="submit" class="button button-primary" id="calculate-button" disabled>Calculate OOD</button>
@@ -81,6 +82,7 @@
             <p class="section-index">02</p>
             <h2 id="result-heading">Anatomy result</h2>
           </div>
+          <div class="result-model-chip" id="result-model-chip" hidden>-</div>
         </div>
 
         <div class="result-empty" id="result-empty">
@@ -91,7 +93,7 @@
         <div class="result-content" id="result-content" hidden>
           <div class="primary-results">
             <div class="percentile-result">
-              <span class="metric-label">Institutional percentile</span>
+              <span class="metric-label">Age-adjusted percentile</span>
               <strong><span id="percentile-value">0.0</span><small>%</small></strong>
             </div>
             <div class="score-result">
@@ -99,19 +101,23 @@
               <strong class="meaning-value" id="meaning-value">-</strong>
             </div>
             <div class="distance-result">
-              <span class="metric-label">Reference rarity</span>
+              <span class="metric-label">Calibration rarity</span>
               <strong id="rarity-value">-</strong>
               <span class="metric-caption" id="rarity-caption">-</span>
             </div>
           </div>
 
-          <div class="percentile-track" aria-label="OOD percentile scale">
+          <div class="percentile-track" aria-label="Age-adjusted percentile scale; upper tail expanded for readability">
             <div class="track-segment track-routine"><span>Typical</span></div>
             <div class="track-segment track-uncommon"><span>Uncommon</span></div>
-            <div class="track-segment track-ood"><span>OOD</span></div>
-            <span class="track-marker" id="track-marker" aria-hidden="true"></span>
+            <div class="track-segment track-ood"><span>Rare</span></div>
+            <span class="track-break" aria-hidden="true">//</span>
+            <span class="track-marker" id="track-marker" aria-hidden="true">
+              <span class="track-marker-badge" id="track-marker-badge">0.0%</span>
+            </span>
           </div>
           <div class="track-labels" aria-hidden="true"><span>0</span><span>90</span><span>97.5</span><span>100</span></div>
+          <div class="track-scale-note">Tail expanded for readability</div>
 
           <div class="detail-grid">
             <div class="detail-item">
@@ -133,21 +139,31 @@
           </div>
 
           <div class="deviation-row">
-            <span>Dominant standardized deviations</span>
+            <span>Largest age-adjusted marginal deviations</span>
             <strong id="dominant-deviation">-</strong>
           </div>
+
+          <section class="anatomy-profile" aria-labelledby="profile-heading">
+            <div class="profile-heading-row">
+              <h3 id="profile-heading">Reference position by measurement</h3>
+              <span>Age-adjusted marginal distributions</span>
+            </div>
+            <div class="profile-list" id="profile-list"></div>
+          </section>
 
           <details class="technical-details">
             <summary>Technical model details</summary>
             <div class="technical-grid">
               <div><span>Selected model</span><strong id="selected-model-detail">-</strong></div>
               <div><span>Mahalanobis OOD distance</span><strong id="distance-value">0.000</strong></div>
+              <div><span>Core-only sensitivity</span><strong id="core-sensitivity">Not applicable</strong></div>
+              <div><span>Calibration</span><strong id="calibration-detail">-</strong></div>
             </div>
           </details>
 
           <div class="interpretation-note">
-            <strong>Anatomical rarity, not refractive prediction.</strong>
-            <span>A high percentile does not establish a large postoperative prediction error or identify the best formula.</span>
+            <strong>Descriptive category, not a clinical threshold.</strong>
+            <span>Anatomical rarity does not establish postoperative prediction error, measurement failure, or the best formula.</span>
           </div>
         </div>
       </div>
@@ -161,7 +177,8 @@
         </div>
         <dl class="model-facts">
           <div><dt>Version</dt><dd id="model-version">-</dd></div>
-          <div><dt>Reference eyes</dt><dd id="reference-eyes">-</dd></div>
+          <div><dt>Calibration eyes / patients</dt><dd id="reference-patients">-</dd></div>
+          <div><dt>Derivation eyes / patients</dt><dd id="derivation-patients">-</dd></div>
           <div><dt>Age range</dt><dd id="age-range">-</dd></div>
           <div><dt>Processing</dt><dd>Browser only</dd></div>
         </dl>
@@ -176,6 +193,7 @@
   </footer>
 
   <script src="ood-core.js" defer></script>
+  <script src="demo-examples.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>

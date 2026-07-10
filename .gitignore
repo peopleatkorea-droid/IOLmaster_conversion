@@ -28,6 +28,10 @@ sample_*.xlsx
 lecture_case_candidates.json
 our_data_summary.json
 
+# Local presentation, lecture, and manuscript figure outputs
+outputs/
+reports/figures/
+
 # Superseded generated model artifacts
 models/biometry_ood_core_v1.json
 reports/biometry_ood_core_v1_validation.json

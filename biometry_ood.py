@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-MODEL_RELATIVE_PATH = Path("models") / "biometry_ood_age_stratified_v2.json"
+MODEL_RELATIVE_PATH = Path("models") / "biometry_ood_bilateral_v31.json"
 
 
 def resource_path(relative_path: Path) -> Path:
@@ -55,13 +55,49 @@ def _dot_matrix_vector(matrix, vector):
     return [sum(row[j] * vector[j] for j in range(len(vector))) for row in matrix]
 
 
-def reference_context(percentile, reference_count):
+def _interpolate(value, anchors, values):
+    if value <= anchors[0]:
+        return values[0]
+    if value >= anchors[-1]:
+        return values[-1]
+    upper = bisect.bisect_right(anchors, value)
+    lower = upper - 1
+    fraction = (value - anchors[lower]) / (anchors[upper] - anchors[lower])
+    return values[lower] + fraction * (values[upper] - values[lower])
+
+
+def _quantile(sorted_values, probability):
+    position = (len(sorted_values) - 1) * probability
+    lower = math.floor(position)
+    upper = math.ceil(position)
+    if lower == upper:
+        return sorted_values[lower]
+    fraction = position - lower
+    return sorted_values[lower] + fraction * (sorted_values[upper] - sorted_values[lower])
+
+
+def reference_context(
+    percentile,
+    reference_count,
+    tail_probability=None,
+    age_local=False,
+    reference_unit=None,
+):
     if percentile < 90.0:
-        return "Within the central 90% of reference eyes"
-    minimum_tail_percent = 100.0 / max(1, reference_count)
-    tail_percent = max(100.0 - percentile, minimum_tail_percent)
-    frequency = max(1, round(100.0 / tail_percent))
-    return f"About 1 in {frequency} reference eyes is this unusual or more"
+        population = (
+            reference_unit
+            or ("age-matched calibration patients" if age_local else "reference eyes")
+        )
+        return f"Within the central 90% of {population}"
+    if tail_probability is None:
+        minimum_tail_probability = 1.0 / max(1, reference_count)
+        tail_probability = max(1.0 - percentile / 100.0, minimum_tail_probability)
+    frequency = max(1, round(1.0 / tail_probability))
+    population = (
+        reference_unit
+        or ("age-weighted calibration patients" if age_local else "reference eyes")
+    )
+    return f"About 1 in {frequency} {population} is this unusual or more"
 
 
 class BiometryOODModel:
@@ -73,7 +109,15 @@ class BiometryOODModel:
         self.location = payload["robust_location"]
         self.precision = payload["precision_matrix"]
         self.standard_deviations = payload["feature_standard_deviations"]
-        self.reference_distances = payload["reference_distances"]
+        self.reference_distances = payload.get(
+            "calibration_distances", payload.get("reference_distances", [])
+        )
+        self.calibration_age_distance = payload.get("calibration_age_distance", [])
+        self.age_calibration_bandwidth = payload.get("age_calibration_bandwidth_years")
+        self.calibration_method = payload.get("calibration_method", "In-sample empirical percentile")
+        self.reference_unit = payload.get("reference_unit")
+        self.feature_scalers = payload.get("feature_scalers")
+        self.marginal_reference_values = payload.get("marginal_reference_values", {})
         self.score_thresholds = payload["score_thresholds_percentile"]
         self.age_adjustment = payload["age_adjustment"]
         self.input_ranges = payload["input_ranges"]
@@ -94,7 +138,63 @@ class BiometryOODModel:
             return None
         t = (age - adjustment["age_center_years"]) / adjustment["age_scale_years"]
         coefficients = feature["coefficients"]
+        if adjustment.get("basis") == "linear hinge spline":
+            result = coefficients[0] + coefficients[1] * t
+            for coefficient, knot in zip(coefficients[2:], adjustment["knots_years"]):
+                scaled_knot = (knot - adjustment["age_center_years"]) / adjustment["age_scale_years"]
+                result += coefficient * max(0.0, t - scaled_knot)
+            return result
         return coefficients[0] + coefficients[1] * t + coefficients[2] * t * t
+
+    def scale_by_age(self, name, age, index):
+        feature = self.age_adjustment["features"].get(name, {})
+        if feature.get("scale_anchors_years"):
+            return _interpolate(age, feature["scale_anchors_years"], feature["scale_values"])
+        if self.feature_scalers:
+            return self.feature_scalers[index]
+        return 1.0
+
+    def calibrated_percentile(self, age, distance):
+        if self.calibration_age_distance and self.age_calibration_bandwidth:
+            total_weight = 0.0
+            below_weight = 0.0
+            squared_weight = 0.0
+            cluster_weights = {}
+            has_clusters = False
+            for pair_index, pair in enumerate(self.calibration_age_distance):
+                calibration_age, calibration_distance = pair[0], pair[1]
+                cluster_id = pair[2] if len(pair) > 2 else pair_index
+                has_clusters = has_clusters or len(pair) > 2
+                weight = math.exp(
+                    -0.5 * ((calibration_age - age) / self.age_calibration_bandwidth) ** 2
+                )
+                total_weight += weight
+                squared_weight += weight * weight
+                cluster_weights[cluster_id] = cluster_weights.get(cluster_id, 0.0) + weight
+                if calibration_distance < distance:
+                    below_weight += weight
+            denominator = total_weight + 1.0
+            percentile = 100.0 * below_weight / denominator
+            tail_probability = (1.0 + total_weight - below_weight) / denominator
+            effective_denominator = (
+                sum(weight * weight for weight in cluster_weights.values())
+                if has_clusters
+                else squared_weight
+            )
+            effective_n = (
+                total_weight * total_weight / effective_denominator
+                if effective_denominator > 0
+                else 0.0
+            )
+            return percentile, tail_probability, effective_n
+        percentile = 100.0 * bisect.bisect_right(
+            self.reference_distances, distance
+        ) / len(self.reference_distances)
+        tail_probability = max(
+            1.0 - percentile / 100.0,
+            1.0 / max(1, len(self.reference_distances)),
+        )
+        return percentile, tail_probability, float(len(self.reference_distances))
 
     def _validate_range(self, name, value):
         lower, upper = self.input_ranges[name]
@@ -129,19 +229,18 @@ class BiometryOODModel:
                 )
 
         transformed = {}
-        for name in self.inputs:
+        vector = []
+        for index, name in enumerate(self.inputs):
             expected = self.expected_by_age(name, age)
             transformed[name] = numeric[name] - expected if expected is not None else numeric[name]
+            vector.append(transformed[name] / self.scale_by_age(name, age, index))
         adjusted_acd = transformed["ACD"]
         adjusted_lt = transformed["LT"]
-        vector = [transformed[name] for name in self.inputs]
         delta = [vector[i] - self.location[i] for i in range(len(vector))]
         projected = _dot_matrix_vector(self.precision, delta)
         distance_squared = max(0.0, sum(delta[i] * projected[i] for i in range(len(delta))))
         distance = math.sqrt(distance_squared)
-        percentile = 100.0 * bisect.bisect_right(self.reference_distances, distance) / len(
-            self.reference_distances
-        )
+        percentile, tail_probability, effective_n = self.calibrated_percentile(age, distance)
         score_0_upper = self.score_thresholds["score_0_upper"]
         score_1_upper = self.score_thresholds["score_1_upper"]
         if percentile < score_0_upper:
@@ -156,7 +255,36 @@ class BiometryOODModel:
             for i in range(len(delta))
         ]
         ranked = sorted(range(len(z_scores)), key=lambda i: abs(z_scores[i]), reverse=True)[:2]
-        dominant = "; ".join(f"{self.feature_labels[i]} {z_scores[i]:+.1f} SD" for i in ranked)
+        dominant = "; ".join(
+            f"{self.feature_labels[i].removesuffix(' vs age')} {z_scores[i]:+.1f} SD"
+            for i in ranked
+        )
+
+        units = {"AL": "mm", "Mean_K": "D", "ACD": "mm", "LT": "mm", "WTW": "mm", "CCT": "mm"}
+        profile = []
+        for index, name in enumerate(self.inputs):
+            reference_values = self.marginal_reference_values.get(name)
+            if not reference_values:
+                continue
+            marginal_percentile = 100.0 * bisect.bisect_left(
+                reference_values, vector[index]
+            ) / (len(reference_values) + 1.0)
+            profile.append(
+                {
+                    "name": name,
+                    "label": "Mean K" if name == "Mean_K" else name,
+                    "unit": units[name],
+                    "observed": numeric[name],
+                    "residual": transformed[name],
+                    "standardized_value": vector[index],
+                    "marginal_percentile": marginal_percentile,
+                    "q2_5": _quantile(reference_values, 0.025),
+                    "q25": _quantile(reference_values, 0.25),
+                    "q50": _quantile(reference_values, 0.50),
+                    "q75": _quantile(reference_values, 0.75),
+                    "q97_5": _quantile(reference_values, 0.975),
+                }
+            )
 
         return {
             "Age_at_Biometry": round(age, 3),
@@ -166,11 +294,21 @@ class BiometryOODModel:
             "OOD_Distance": round(distance, 6),
             "OOD_Percentile": round(percentile, 3),
             "OOD_Status": status,
-            "OOD_Reference_Context": reference_context(percentile, len(self.reference_distances)),
+            "OOD_Reference_Context": reference_context(
+                percentile,
+                len(self.reference_distances),
+                tail_probability=tail_probability,
+                age_local=bool(self.calibration_age_distance),
+                reference_unit=self.reference_unit,
+            ),
             "OOD_Dominant_Deviation": dominant,
+            "OOD_Largest_Marginal_Deviations": dominant,
+            "OOD_Local_Calibration_Effective_N": round(effective_n, 1),
             "OOD_Age_Stratum": self.stratum_label,
             "OOD_Model_Tier": self.tier,
             "OOD_Model_Version": self.version,
+            "OOD_Feature_Profile": profile,
+            "OOD_Calibration_Method": self.calibration_method,
         }
 
     def not_calculated(self, reason, age=None, mean_k=None):
@@ -184,9 +322,13 @@ class BiometryOODModel:
             "OOD_Status": "Not calculated",
             "OOD_Reference_Context": None,
             "OOD_Dominant_Deviation": reason,
+            "OOD_Largest_Marginal_Deviations": reason,
+            "OOD_Local_Calibration_Effective_N": None,
             "OOD_Age_Stratum": self.stratum_label,
             "OOD_Model_Tier": self.tier,
             "OOD_Model_Version": self.version,
+            "OOD_Feature_Profile": [],
+            "OOD_Calibration_Method": self.calibration_method,
         }
 
 
@@ -241,7 +383,15 @@ class BiometryOODSelector:
             "WTW": wtw,
             "CCT": cct,
         }
-        return model.score_values(numeric_age, values)
+        result = model.score_values(numeric_age, values)
+        result["OOD_Core_Sensitivity_Percentile"] = None
+        result["OOD_Core_Sensitivity_Status"] = None
+        if model.tier == "Extended" and result["OOD_Status"] != "Not calculated":
+            core = next(candidate for candidate in self.models_for_age(numeric_age) if candidate.tier == "Core")
+            core_result = core.score_values(numeric_age, values)
+            result["OOD_Core_Sensitivity_Percentile"] = core_result["OOD_Percentile"]
+            result["OOD_Core_Sensitivity_Status"] = core_result["OOD_Status"]
+        return result
 
     def score_row(self, row):
         age = age_at_measurement(row.get("DOB"), row.get("Acquisition_Date"))
@@ -271,9 +421,15 @@ class BiometryOODSelector:
             "OOD_Status": "Not calculated",
             "OOD_Reference_Context": None,
             "OOD_Dominant_Deviation": reason,
+            "OOD_Largest_Marginal_Deviations": reason,
+            "OOD_Local_Calibration_Effective_N": None,
             "OOD_Age_Stratum": None,
             "OOD_Model_Tier": None,
             "OOD_Model_Version": self.version,
+            "OOD_Core_Sensitivity_Percentile": None,
+            "OOD_Core_Sensitivity_Status": None,
+            "OOD_Feature_Profile": [],
+            "OOD_Calibration_Method": None,
         }
 
 

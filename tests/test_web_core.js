@@ -15,7 +15,6 @@ const result = core.calculate(model, {
 
 assert(Math.abs(result.percentile - 93.57184409540431) < 1e-10);
 assert(Math.abs(result.distance - 3.318076665704779) < 1e-10);
-assert.strictEqual(result.score, 1);
 assert.strictEqual(result.status, "Uncommon anatomy");
 assert.strictEqual(result.dominant, "ACD vs age -2.6 SD; LT vs age +2.2 SD");
 assert.strictEqual(result.model.model_key, "adult_core");

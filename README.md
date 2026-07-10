@@ -21,12 +21,12 @@ AL / Mean K / Age-adjusted ACD / Age-adjusted LT
 출력 열의 의미는 다음과 같습니다.
 
 ```text
-OOD_Percentile < 90.0       Anatomy_Score 0: Typical anatomy
-90.0 이상, 97.5 미만       Anatomy_Score 1: Uncommon anatomy
-97.5 이상                  Anatomy_Score 2: Highly unusual anatomy
+OOD_Percentile < 90.0       Typical anatomy
+90.0 이상, 97.5 미만       Uncommon anatomy
+97.5 이상                  Rare anatomy
 ```
 
-`OOD_Reference_Context`는 동일 기준군에서 이 정도 이상으로 드문 눈이 대략 몇 안 중 1안인지 표시합니다. `Anatomy_Score`와 `OOD_Distance`는 연구 및 재현성을 위한 기술 지표이며, 웹 화면에서는 접힌 세부정보로만 제공합니다. `OOD_Dominant_Deviation`은 절대 standardized deviation이 큰 두 축을 표시합니다. 이는 Mahalanobis distance의 인과적 분해나 굴절오차 설명이 아닙니다.
+`OOD_Reference_Context`는 동일 기준군에서 이 정도 이상으로 드문 눈이 대략 몇 안 중 1안인지 표시합니다. `OOD_Distance`는 연구 및 재현성을 위한 기술 지표이며, 웹 화면에서는 접힌 세부정보로만 제공합니다. `OOD_Dominant_Deviation`은 절대 standardized deviation이 큰 두 축을 표시합니다. 이는 Mahalanobis distance의 인과적 분해나 굴절오차 설명이 아닙니다.
 
 현재 `age-stratified-v2.0.0`은 연령에 따라 Pediatric(2–17세), Young adult(18–39세), Adult cataract-age(40–100세)를 자동 선택합니다. WTW와 CCT가 모두 유효하면 Extended, 둘 중 하나라도 없으면 Core를 선택합니다. 해부학적 희귀도를 나타낼 뿐, 굴절 prediction error나 최적 formula를 직접 예측하지 않습니다. 외부 검증과 술후 결과 검증 전에는 임상 의사결정 기준으로 사용하지 마십시오.
 

@@ -33,7 +33,7 @@ SOURCE_COLUMNS = [
 OOD_OUTPUT_COLUMNS = [
     "Age_at_Biometry", "Mean_K", "Age_Adjusted_ACD", "Age_Adjusted_LT",
     "OOD_Percentile", "OOD_Status", "OOD_Reference_Context", "OOD_Dominant_Deviation",
-    "OOD_Age_Stratum", "OOD_Model_Tier", "OOD_Model_Version", "OOD_Distance", "Anatomy_Score",
+    "OOD_Age_Stratum", "OOD_Model_Tier", "OOD_Model_Version", "OOD_Distance",
 ]
 
 OUTPUT_COLUMNS = SOURCE_COLUMNS + OOD_OUTPUT_COLUMNS
@@ -42,7 +42,7 @@ NUMERIC_COLUMNS = {
     "AL", "AL_SD", "R1", "R2", "A1", "A2", "TR1", "TR2", "TA1", "TA2",
     "ACD", "AQD", "LT", "CCT", "W2W", "P", "Sphere", "Cylinder", "Axis",
     "Age_at_Biometry", "Mean_K", "Age_Adjusted_ACD", "Age_Adjusted_LT",
-    "OOD_Distance", "OOD_Percentile", "Anatomy_Score",
+    "OOD_Distance", "OOD_Percentile",
 }
 
 TEXT_COLUMNS = {
@@ -188,7 +188,7 @@ def write_eye_based_xlsx(rows, xlsx_path: Path):
         elif col_name == "Pat_ID":
             for cell in ws[f"{letter}2:{letter}{ws.max_row}"]:
                 cell[0].number_format = "@"
-        elif col_name in {"Axis", "Anatomy_Score"}:
+        elif col_name == "Axis":
             for cell in ws[f"{letter}2:{letter}{ws.max_row}"]:
                 cell[0].number_format = "0"
 
@@ -196,7 +196,7 @@ def write_eye_based_xlsx(rows, xlsx_path: Path):
     status_fills = {
         "Typical anatomy": PatternFill("solid", fgColor="E2F0D9"),
         "Uncommon anatomy": PatternFill("solid", fgColor="FFF2CC"),
-        "Highly unusual anatomy": PatternFill("solid", fgColor="FCE4D6"),
+        "Rare anatomy": PatternFill("solid", fgColor="FCE4D6"),
         "Not calculated": PatternFill("solid", fgColor="E7E6E6"),
     }
     for cell_tuple in ws[f"{status_col}2:{status_col}{ws.max_row}"]:

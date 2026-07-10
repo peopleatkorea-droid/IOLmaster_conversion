@@ -104,17 +104,14 @@
     const distance = Math.sqrt(distanceSquared);
     const percentile = percentileOf(model.reference_distances, distance);
 
-    let score = 0;
     let status = "Typical anatomy";
     let statusClass = "status-routine";
     const score0Upper = model.score_thresholds_percentile.score_0_upper;
     const score1Upper = model.score_thresholds_percentile.score_1_upper;
     if (percentile >= score1Upper) {
-      score = 2;
-      status = "Highly unusual anatomy";
+      status = "Rare anatomy";
       statusClass = "status-ood";
     } else if (percentile >= score0Upper) {
-      score = 1;
       status = "Uncommon anatomy";
       statusClass = "status-uncommon";
     }
@@ -134,7 +131,6 @@
       adjustedLt,
       distance,
       percentile,
-      score,
       status,
       statusClass,
       dominant,

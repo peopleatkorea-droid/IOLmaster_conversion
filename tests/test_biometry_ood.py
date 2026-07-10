@@ -36,7 +36,6 @@ class BiometryOODTests(unittest.TestCase):
 
     def test_user_example_is_uncommon(self):
         result = self.model.score_values(80, 23.61, 40.80, 1.94, 5.58)
-        self.assertEqual(result["Anatomy_Score"], 1)
         self.assertEqual(result["OOD_Status"], "Uncommon anatomy")
         self.assertAlmostEqual(result["OOD_Percentile"], 93.572, places=3)
         self.assertIn("ACD vs age", result["OOD_Dominant_Deviation"])

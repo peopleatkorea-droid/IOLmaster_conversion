@@ -81,7 +81,6 @@
             <p class="section-index">02</p>
             <h2 id="result-heading">Anatomy result</h2>
           </div>
-          <span class="status-label status-waiting" id="status-label">Awaiting input</span>
         </div>
 
         <div class="result-empty" id="result-empty">
@@ -96,18 +95,18 @@
               <strong><span id="percentile-value">0.0</span><small>%</small></strong>
             </div>
             <div class="score-result">
+              <span class="metric-label">Meaning</span>
+              <strong class="meaning-value" id="meaning-value">-</strong>
+            </div>
+            <div class="distance-result">
               <span class="metric-label">Reference rarity</span>
               <strong id="rarity-value">-</strong>
               <span class="metric-caption" id="rarity-caption">-</span>
             </div>
-            <div class="distance-result">
-              <span class="metric-label">Selected model</span>
-              <strong class="selected-model-value" id="selected-model-primary">-</strong>
-            </div>
           </div>
 
           <div class="percentile-track" aria-label="OOD percentile scale">
-            <div class="track-segment track-routine"><span>Routine</span></div>
+            <div class="track-segment track-routine"><span>Typical</span></div>
             <div class="track-segment track-uncommon"><span>Uncommon</span></div>
             <div class="track-segment track-ood"><span>OOD</span></div>
             <span class="track-marker" id="track-marker" aria-hidden="true"></span>
@@ -141,7 +140,7 @@
           <details class="technical-details">
             <summary>Technical model details</summary>
             <div class="technical-grid">
-              <div><span>Anatomy score</span><strong><span id="score-value">0</span> / 2</strong></div>
+              <div><span>Selected model</span><strong id="selected-model-detail">-</strong></div>
               <div><span>Mahalanobis OOD distance</span><strong id="distance-value">0.000</strong></div>
             </div>
           </details>

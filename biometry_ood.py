@@ -145,11 +145,11 @@ class BiometryOODModel:
         score_0_upper = self.score_thresholds["score_0_upper"]
         score_1_upper = self.score_thresholds["score_1_upper"]
         if percentile < score_0_upper:
-            score, status = 0, "Typical anatomy"
+            status = "Typical anatomy"
         elif percentile < score_1_upper:
-            score, status = 1, "Uncommon anatomy"
+            status = "Uncommon anatomy"
         else:
-            score, status = 2, "Highly unusual anatomy"
+            status = "Rare anatomy"
 
         z_scores = [
             delta[i] / self.standard_deviations[i] if self.standard_deviations[i] > 0 else 0.0
@@ -165,7 +165,6 @@ class BiometryOODModel:
             "Age_Adjusted_LT": round(adjusted_lt, 6),
             "OOD_Distance": round(distance, 6),
             "OOD_Percentile": round(percentile, 3),
-            "Anatomy_Score": score,
             "OOD_Status": status,
             "OOD_Reference_Context": reference_context(percentile, len(self.reference_distances)),
             "OOD_Dominant_Deviation": dominant,
@@ -182,7 +181,6 @@ class BiometryOODModel:
             "Age_Adjusted_LT": None,
             "OOD_Distance": None,
             "OOD_Percentile": None,
-            "Anatomy_Score": None,
             "OOD_Status": "Not calculated",
             "OOD_Reference_Context": None,
             "OOD_Dominant_Deviation": reason,
@@ -270,7 +268,6 @@ class BiometryOODSelector:
             "Age_Adjusted_LT": None,
             "OOD_Distance": None,
             "OOD_Percentile": None,
-            "Anatomy_Score": None,
             "OOD_Status": "Not calculated",
             "OOD_Reference_Context": None,
             "OOD_Dominant_Deviation": reason,

@@ -34,7 +34,9 @@ OOD_OUTPUT_COLUMNS = [
     "Age_at_Biometry", "Mean_K", "Age_Adjusted_ACD", "Age_Adjusted_LT",
     "OOD_Percentile", "OOD_Status", "OOD_Reference_Context",
     "OOD_Largest_Marginal_Deviations", "OOD_Local_Calibration_Effective_N",
+    "OOD_Local_Calibration_Max_Percentile", "OOD_Calibration_Warning",
     "OOD_Core_Sensitivity_Percentile", "OOD_Core_Sensitivity_Status",
+    "OOD_Model_Selection_Warning",
     "OOD_Age_Stratum", "OOD_Model_Tier", "OOD_Model_Version", "OOD_Distance",
 ]
 
@@ -45,12 +47,14 @@ NUMERIC_COLUMNS = {
     "ACD", "AQD", "LT", "CCT", "W2W", "P", "Sphere", "Cylinder", "Axis",
     "Age_at_Biometry", "Mean_K", "Age_Adjusted_ACD", "Age_Adjusted_LT",
     "OOD_Distance", "OOD_Percentile", "OOD_Local_Calibration_Effective_N",
+    "OOD_Local_Calibration_Max_Percentile",
     "OOD_Core_Sensitivity_Percentile",
 }
 
 TEXT_COLUMNS = {
     "Pat_ID", "Last_Name", "First_Name", "DOB", "Acquisition_Date", "Eye_Side",
     "OOD_Status", "OOD_Reference_Context", "OOD_Largest_Marginal_Deviations",
+    "OOD_Calibration_Warning", "OOD_Model_Selection_Warning",
     "OOD_Core_Sensitivity_Status", "OOD_Model_Version", "OOD_Age_Stratum", "OOD_Model_Tier",
 }
 
@@ -170,7 +174,10 @@ def write_eye_based_xlsx(rows, xlsx_path: Path):
     # Number formats
     numeric_9_dec = ["AL", "AL_SD", "R1", "R2", "A1", "A2", "TR1", "TR2", "TA1", "TA2", "ACD", "AQD", "LT", "CCT", "W2W", "P"]
     numeric_6_dec = ["Mean_K", "Age_Adjusted_ACD", "Age_Adjusted_LT", "OOD_Distance"]
-    numeric_3_dec = ["Age_at_Biometry", "OOD_Percentile", "OOD_Core_Sensitivity_Percentile"]
+    numeric_3_dec = [
+        "Age_at_Biometry", "OOD_Percentile", "OOD_Local_Calibration_Max_Percentile",
+        "OOD_Core_Sensitivity_Percentile",
+    ]
     numeric_1_dec = ["OOD_Local_Calibration_Effective_N"]
     numeric_2_dec = ["Sphere", "Cylinder"]
     for col_idx, col_name in enumerate(OUTPUT_COLUMNS, start=1):

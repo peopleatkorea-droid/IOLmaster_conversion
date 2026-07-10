@@ -80,6 +80,13 @@ h3 { margin: 0; font-size: 15px; line-height: 1.3; letter-spacing: 0; }
 .model-state.ready { border-color: #74b8ae; color: #d7f2ec; }
 .model-state.error { border-color: #e3a49e; color: #ffe4e1; }
 
+.governance-band { border-bottom: 1px solid #c6d2d8; background: #e9f0f2; }
+.governance-layout { display: grid; grid-template-columns: 1fr 1fr; }
+.governance-layout > div { min-height: 74px; padding: 15px 24px 15px 0; }
+.governance-layout > div + div { border-left: 1px solid #c6d2d8; padding-left: 24px; }
+.governance-layout strong { display: block; color: var(--navy); font-size: 13px; }
+.governance-layout span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
+
 .input-band,
 .result-band,
 .model-band { padding: 34px 0; }
@@ -143,6 +150,7 @@ input[aria-invalid="true"] { border-color: var(--red); }
 .form-feedback { min-height: 42px; }
 .example-caption { margin: 0 0 3px; color: var(--ink); font-size: 13px; font-weight: 700; }
 .model-preview { margin: 0; color: var(--teal-dark); font-size: 13px; font-weight: 650; }
+.model-selection-warning { margin: 4px 0 0; color: var(--amber); font-size: 13px; font-weight: 650; }
 .validation-message { margin: 4px 0 0; color: var(--red); font-size: 13px; }
 
 .button {
@@ -181,6 +189,16 @@ input[aria-invalid="true"] { border-color: var(--red); }
   color: var(--navy);
   font-size: 12px;
   font-weight: 700;
+}
+
+.result-warning {
+  margin: 0 0 16px;
+  border-left: 4px solid var(--amber);
+  background: var(--amber-soft);
+  color: #714500;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 650;
 }
 
 .primary-results {
@@ -376,6 +394,20 @@ input[aria-invalid="true"] { border-color: var(--red); }
 }
 .interpretation-note strong { color: var(--red); white-space: nowrap; }
 
+.result-provenance {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.result-provenance > div { min-height: 78px; padding: 13px 16px; border-right: 1px solid var(--line); }
+.result-provenance > div:first-child { padding-left: 0; }
+.result-provenance > div:last-child { border-right: 0; }
+.result-provenance span { display: block; color: var(--muted); font-size: 11px; font-weight: 650; }
+.result-provenance strong { display: block; margin-top: 5px; font-size: 13px; line-height: 1.4; }
+.result-provenance-wide strong { color: #754700; }
+
 .model-layout { display: grid; grid-template-columns: 1fr 3fr; gap: 44px; align-items: start; }
 .model-facts { margin: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .model-facts div { padding: 4px 18px; border-left: 1px solid #becbd2; }
@@ -394,6 +426,9 @@ footer { padding: 18px 0; background: var(--navy); color: #c8d7df; font-size: 12
   .content-width,
   .header-inner { width: min(calc(100% - 28px), var(--max-width)); }
   .header-inner { min-height: 112px; align-items: flex-start; flex-direction: column; justify-content: center; gap: 8px; }
+  .governance-layout { grid-template-columns: 1fr; }
+  .governance-layout > div { min-height: auto; padding: 12px 0; }
+  .governance-layout > div + div { border-top: 1px solid #c6d2d8; border-left: 0; padding-left: 0; }
   h1 { font-size: 22px; }
   h2 { font-size: 19px; }
   .model-state { white-space: normal; text-align: left; }
@@ -422,6 +457,11 @@ footer { padding: 18px 0; background: var(--navy); color: #c8d7df; font-size: 12
   .deviation-row strong { text-align: left; }
   .meaning-value { font-size: 18px !important; }
   .interpretation-note strong { white-space: normal; }
+  .result-provenance { grid-template-columns: 1fr 1fr; }
+  .result-provenance > div { padding: 12px 10px; }
+  .result-provenance > div:first-child { padding-left: 0; }
+  .result-provenance > div:nth-child(2) { border-right: 0; }
+  .result-provenance-wide { grid-column: 1 / -1; border-top: 1px solid var(--line); }
   .model-facts { grid-template-columns: 1fr 1fr; }
   .model-facts div { padding: 4px 10px; }
   .profile-heading-row { align-items: flex-start; flex-direction: column; gap: 3px; }

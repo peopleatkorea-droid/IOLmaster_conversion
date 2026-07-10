@@ -21,7 +21,7 @@
       "age_min_inclusive": 2.0,
       "age_max_exclusive": 101.0,
       "cohort_status": "Single-center bilateral institutional eye reference with patient-level splits; clinical indication is not verified by EMR.",
-      "reference_unit": "patient-clustered calibration eyes",
+      "reference_unit": "age-weighted calibration eyes",
       "tier": "Core",
       "inputs": [
         "AL",
@@ -12995,7 +12995,7 @@
       "age_min_inclusive": 2.0,
       "age_max_exclusive": 101.0,
       "cohort_status": "Single-center bilateral institutional eye reference with patient-level splits; clinical indication is not verified by EMR.",
-      "reference_unit": "patient-clustered calibration eyes",
+      "reference_unit": "age-weighted calibration eyes",
       "tier": "Extended",
       "inputs": [
         "AL",

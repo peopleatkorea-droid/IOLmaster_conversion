@@ -1,9 +1,11 @@
 const fs = require("fs");
 const assert = require("assert");
+const path = require("path");
 const core = require("../web/ood-core.js");
 const demoExamples = require("../web/demo-examples.js");
 
-const model = JSON.parse(fs.readFileSync("models/biometry_ood_bilateral_v31.json", "utf8"));
+const modelPath = path.resolve(__dirname, "..", "models", "biometry_ood_bilateral_v31.json");
+const model = JSON.parse(fs.readFileSync(modelPath, "utf8"));
 const result = core.calculate(model, {
   age: 80,
   al: 23.61,
@@ -33,10 +35,38 @@ const extended = core.calculate(model, {
 assert.strictEqual(extended.model.model_key, "bilateral_extended");
 assert(Math.abs(extended.percentile - 95.72502795434605) < 1e-8);
 assert.deepStrictEqual(extended.rarity, {
-  value: "1 in 23",
-  caption: "patient-clustered calibration eyes is this unusual or more",
+  value: "~1 in 20–30",
+  caption: "age-weighted calibration eyes is this unusual or more",
 });
 assert(Math.abs(extended.coreSensitivity.percentile - result.percentile) < 1e-10);
+assert(extended.maxPercentile > 99);
+assert.strictEqual(extended.calibrationWarning, "");
+
+const fallback = core.calculate(model, {
+  age: 80,
+  al: 23.61,
+  meanK: 40.80,
+  acd: 1.94,
+  lt: 5.58,
+  wtw: 7.5,
+  cct: 0.601,
+});
+assert.strictEqual(fallback.model.tier, "Core");
+assert(fallback.modelSelectionWarning.includes("WTW is outside 8–16"));
+assert(fallback.modelSelectionWarning.includes("Valid CCT input was ignored"));
+
+const sparseYoung = core.calculate(model, {
+  age: 25,
+  al: 25.68,
+  meanK: 43.30,
+  acd: 3.68,
+  lt: 3.52,
+  wtw: 12,
+  cct: 0.54,
+});
+assert(sparseYoung.maxPercentile < 97.5);
+assert(sparseYoung.effectiveN < 50);
+assert(sparseYoung.calibrationWarning.includes("Rare threshold is not attainable"));
 
 assert.strictEqual(core.selectModel(model, { age: 8, wtw: null, cct: null }).model_key, "bilateral_core");
 assert.strictEqual(core.selectModel(model, { age: 25, wtw: 12, cct: 0.54 }).model_key, "bilateral_extended");

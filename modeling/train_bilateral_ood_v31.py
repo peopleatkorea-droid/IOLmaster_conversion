@@ -253,7 +253,7 @@ def train_model(source_path, tier):
             "Single-center bilateral institutional eye reference with patient-level splits; "
             "clinical indication is not verified by EMR."
         ),
-        "reference_unit": "patient-clustered calibration eyes",
+        "reference_unit": "age-weighted calibration eyes",
         "tier": tier,
         "inputs": inputs,
         "input_ranges": {name: list(v3.INPUT_RANGES[name]) for name in inputs},

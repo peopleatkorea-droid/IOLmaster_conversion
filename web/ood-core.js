@@ -80,6 +80,35 @@
     return (100 * upperBound(sortedValues, value)) / sortedValues.length;
   }
 
+  function approximateFrequencyRange(tailProbability) {
+    const frequency = Math.max(1, 1 / Math.max(tailProbability, 1e-12));
+    let step = 100;
+    if (frequency < 10) step = 1;
+    else if (frequency < 50) step = 5;
+    else if (frequency < 100) step = 10;
+    else if (frequency < 250) step = 25;
+    else if (frequency < 500) step = 50;
+    const lower = Math.max(1, Math.round((frequency * 0.8) / step) * step);
+    let upper = Math.max(lower, Math.round((frequency * 1.25) / step) * step);
+    if (upper === lower) upper += step;
+    return { lower, upper };
+  }
+
+  function calibrationWarning(calibration) {
+    const warnings = [];
+    if (calibration.maxPercentile < 97.5) {
+      warnings.push(
+        `Age-local calibration can reach at most ${calibration.maxPercentile.toFixed(1)} percentile at this age, so the Rare threshold is not attainable.`,
+      );
+    }
+    if (calibration.effectiveN < 50) {
+      warnings.push(
+        `Age-local calibration effective N is ${calibration.effectiveN.toFixed(0)}; percentile precision is limited.`,
+      );
+    }
+    return warnings.join(" ");
+  }
+
   function calibratedPercentile(model, age, distance) {
     if (model.calibration_age_distance && model.age_calibration_bandwidth_years) {
       let totalWeight = 0;
@@ -107,6 +136,7 @@
         percentile: (100 * belowWeight) / denominator,
         tailProbability: (1 + totalWeight - belowWeight) / denominator,
         effectiveN: effectiveDenominator ? (totalWeight * totalWeight) / effectiveDenominator : 0,
+        maxPercentile: (100 * totalWeight) / denominator,
         ageLocal: true,
       };
     }
@@ -116,6 +146,7 @@
       percentile,
       tailProbability: Math.max(1 - percentile / 100, 1 / Math.max(1, distances.length)),
       effectiveN: distances.length,
+      maxPercentile: 100,
       ageLocal: false,
     };
   }
@@ -124,13 +155,13 @@
     if (percentile < 90) {
       return {
         value: "Common",
-        caption: `Within the central 90% of ${referenceUnit || (ageLocal ? "age-matched calibration patients" : "reference eyes")}`,
+        caption: `Within the central 90% of ${referenceUnit || (ageLocal ? "age-weighted calibration eyes" : "reference eyes")}`,
       };
     }
-    const frequency = Math.max(1, Math.round(1 / tailProbability));
+    const { lower, upper } = approximateFrequencyRange(tailProbability);
     return {
-      value: `1 in ${frequency}`,
-      caption: `${referenceUnit || (ageLocal ? "age-weighted calibration patients" : "reference eyes")} is this unusual or more`,
+      value: `~1 in ${lower}–${upper}`,
+      caption: `${referenceUnit || (ageLocal ? "age-weighted calibration eyes" : "reference eyes")} is this unusual or more`,
     };
   }
 
@@ -153,6 +184,36 @@
       return extended;
     }
     return candidates.find((model) => model.tier === "Core");
+  }
+
+  function modelSelectionWarning(bundle, values) {
+    const candidates = modelsForAge(bundle, values.age);
+    if (!candidates.length) return "";
+    const extended = candidates.find((model) => model.tier === "Extended");
+    const optional = [
+      ["WTW", values.wtw],
+      ["CCT", values.cct],
+    ];
+    const provided = optional.filter(([, value]) => value !== null && value !== "");
+    if (!provided.length) return "";
+
+    const issues = [];
+    const ignored = [];
+    optional.forEach(([name, value]) => {
+      if (value === null || value === "") {
+        issues.push(`${name} is missing`);
+        return;
+      }
+      if (!inRange(extended, name, value)) {
+        const range = extended.input_ranges[name];
+        issues.push(`${name} is outside ${range[0]}–${range[1]}`);
+      } else {
+        ignored.push(name);
+      }
+    });
+    if (!issues.length) return "";
+    const ignoredText = ignored.length ? ` Valid ${ignored.join(" and ")} input was ignored.` : "";
+    return `Extended model not used: ${issues.join("; ")}.${ignoredText} Core model calculated.`;
   }
 
   function validate(bundle, values) {
@@ -257,6 +318,8 @@
         model.reference_unit || null,
       ),
       effectiveN: calibration.effectiveN,
+      maxPercentile: calibration.maxPercentile,
+      calibrationWarning: calibrationWarning(calibration),
       calibration,
       profile,
       model,
@@ -268,6 +331,7 @@
     const model = selectModel(bundle, values);
     if (!model) throw new Error("No OOD model is available for this age.");
     const result = calculateForModel(model, values);
+    result.modelSelectionWarning = modelSelectionWarning(bundle, values);
     if (model.tier === "Extended") {
       const core = modelsForAge(bundle, values.age).find((candidate) => candidate.tier === "Core");
       const coreResult = calculateForModel(core, values);
@@ -284,9 +348,11 @@
     calculate,
     calculateForModel,
     calibratedPercentile,
+    calibrationWarning,
     expectedByAge,
     percentileOf,
     raritySummary,
+    modelSelectionWarning,
     selectModel,
     tailExpandedPosition,
     validate,

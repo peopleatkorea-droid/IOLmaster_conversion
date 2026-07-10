@@ -76,6 +76,41 @@ def _quantile(sorted_values, probability):
     return sorted_values[lower] + fraction * (sorted_values[upper] - sorted_values[lower])
 
 
+def approximate_frequency_range(tail_probability):
+    frequency = max(1.0, 1.0 / max(tail_probability, 1e-12))
+    if frequency < 10:
+        step = 1
+    elif frequency < 50:
+        step = 5
+    elif frequency < 100:
+        step = 10
+    elif frequency < 250:
+        step = 25
+    elif frequency < 500:
+        step = 50
+    else:
+        step = 100
+    lower = max(1, round((frequency * 0.8) / step) * step)
+    upper = max(lower, round((frequency * 1.25) / step) * step)
+    if upper == lower:
+        upper += step
+    return int(lower), int(upper)
+
+
+def calibration_warning(effective_n, max_percentile):
+    warnings = []
+    if max_percentile < 97.5:
+        warnings.append(
+            f"Age-local calibration can reach at most {max_percentile:.1f} percentile at this age, "
+            "so the Rare threshold is not attainable."
+        )
+    if effective_n < 50:
+        warnings.append(
+            f"Age-local calibration effective N is {effective_n:.0f}; percentile precision is limited."
+        )
+    return " ".join(warnings) or None
+
+
 def reference_context(
     percentile,
     reference_count,
@@ -86,18 +121,18 @@ def reference_context(
     if percentile < 90.0:
         population = (
             reference_unit
-            or ("age-matched calibration patients" if age_local else "reference eyes")
+            or ("age-weighted calibration eyes" if age_local else "reference eyes")
         )
         return f"Within the central 90% of {population}"
     if tail_probability is None:
         minimum_tail_probability = 1.0 / max(1, reference_count)
         tail_probability = max(1.0 - percentile / 100.0, minimum_tail_probability)
-    frequency = max(1, round(1.0 / tail_probability))
+    lower, upper = approximate_frequency_range(tail_probability)
     population = (
         reference_unit
-        or ("age-weighted calibration patients" if age_local else "reference eyes")
+        or ("age-weighted calibration eyes" if age_local else "reference eyes")
     )
-    return f"About 1 in {frequency} {population} is this unusual or more"
+    return f"About 1 in {lower}-{upper} {population} is this unusual or more"
 
 
 class BiometryOODModel:
@@ -186,7 +221,8 @@ class BiometryOODModel:
                 if effective_denominator > 0
                 else 0.0
             )
-            return percentile, tail_probability, effective_n
+            max_percentile = 100.0 * total_weight / denominator
+            return percentile, tail_probability, effective_n, max_percentile
         percentile = 100.0 * bisect.bisect_right(
             self.reference_distances, distance
         ) / len(self.reference_distances)
@@ -194,7 +230,7 @@ class BiometryOODModel:
             1.0 - percentile / 100.0,
             1.0 / max(1, len(self.reference_distances)),
         )
-        return percentile, tail_probability, float(len(self.reference_distances))
+        return percentile, tail_probability, float(len(self.reference_distances)), 100.0
 
     def _validate_range(self, name, value):
         lower, upper = self.input_ranges[name]
@@ -240,7 +276,9 @@ class BiometryOODModel:
         projected = _dot_matrix_vector(self.precision, delta)
         distance_squared = max(0.0, sum(delta[i] * projected[i] for i in range(len(delta))))
         distance = math.sqrt(distance_squared)
-        percentile, tail_probability, effective_n = self.calibrated_percentile(age, distance)
+        percentile, tail_probability, effective_n, max_percentile = self.calibrated_percentile(
+            age, distance
+        )
         score_0_upper = self.score_thresholds["score_0_upper"]
         score_1_upper = self.score_thresholds["score_1_upper"]
         if percentile < score_0_upper:
@@ -304,6 +342,8 @@ class BiometryOODModel:
             "OOD_Dominant_Deviation": dominant,
             "OOD_Largest_Marginal_Deviations": dominant,
             "OOD_Local_Calibration_Effective_N": round(effective_n, 1),
+            "OOD_Local_Calibration_Max_Percentile": round(max_percentile, 3),
+            "OOD_Calibration_Warning": calibration_warning(effective_n, max_percentile),
             "OOD_Age_Stratum": self.stratum_label,
             "OOD_Model_Tier": self.tier,
             "OOD_Model_Version": self.version,
@@ -324,6 +364,8 @@ class BiometryOODModel:
             "OOD_Dominant_Deviation": reason,
             "OOD_Largest_Marginal_Deviations": reason,
             "OOD_Local_Calibration_Effective_N": None,
+            "OOD_Local_Calibration_Max_Percentile": None,
+            "OOD_Calibration_Warning": None,
             "OOD_Age_Stratum": self.stratum_label,
             "OOD_Model_Tier": self.tier,
             "OOD_Model_Version": self.version,
@@ -363,6 +405,40 @@ class BiometryOODSelector:
             return extended
         return next(model for model in candidates if model.tier == "Core")
 
+    def model_selection_warning(self, age, wtw=None, cct=None):
+        candidates = self.models_for_age(age)
+        if not candidates:
+            return None
+        extended = next(model for model in candidates if model.tier == "Extended")
+        optional = {"WTW": wtw, "CCT": cct}
+        provided = {
+            name: value is not None and str(value).strip() != ""
+            for name, value in optional.items()
+        }
+        if not any(provided.values()):
+            return None
+
+        issues = []
+        ignored = []
+        for name, value in optional.items():
+            if not provided[name]:
+                issues.append(f"{name} is missing")
+                continue
+            try:
+                numeric = float(value)
+            except (TypeError, ValueError):
+                issues.append(f"{name} is non-numeric")
+                continue
+            lower, upper = extended.input_ranges[name]
+            if not math.isfinite(numeric) or not lower <= numeric <= upper:
+                issues.append(f"{name} is outside {lower:g}-{upper:g}")
+            else:
+                ignored.append(name)
+        if not issues:
+            return None
+        ignored_text = f" Valid {' and '.join(ignored)} input was ignored." if ignored else ""
+        return f"Extended model not used: {'; '.join(issues)}.{ignored_text} Core model calculated."
+
     def score_values(self, age, al, mean_k, acd, lt, wtw=None, cct=None):
         try:
             numeric_age = float(age)
@@ -384,6 +460,9 @@ class BiometryOODSelector:
             "CCT": cct,
         }
         result = model.score_values(numeric_age, values)
+        result["OOD_Model_Selection_Warning"] = self.model_selection_warning(
+            numeric_age, wtw, cct
+        )
         result["OOD_Core_Sensitivity_Percentile"] = None
         result["OOD_Core_Sensitivity_Status"] = None
         if model.tier == "Extended" and result["OOD_Status"] != "Not calculated":
@@ -423,11 +502,14 @@ class BiometryOODSelector:
             "OOD_Dominant_Deviation": reason,
             "OOD_Largest_Marginal_Deviations": reason,
             "OOD_Local_Calibration_Effective_N": None,
+            "OOD_Local_Calibration_Max_Percentile": None,
+            "OOD_Calibration_Warning": None,
             "OOD_Age_Stratum": None,
             "OOD_Model_Tier": None,
             "OOD_Model_Version": self.version,
             "OOD_Core_Sensitivity_Percentile": None,
             "OOD_Core_Sensitivity_Status": None,
+            "OOD_Model_Selection_Warning": None,
             "OOD_Feature_Profile": [],
             "OOD_Calibration_Method": None,
         }

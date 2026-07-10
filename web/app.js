@@ -101,7 +101,14 @@ function showResult(result) {
   document.querySelector("#core-sensitivity").textContent = result.coreSensitivity
     ? `${result.coreSensitivity.percentile.toFixed(1)}th · ${result.coreSensitivity.status} (${result.coreSensitivity.difference >= 0 ? "+" : ""}${result.coreSensitivity.difference.toFixed(1)})`
     : "Core model selected";
-  document.querySelector("#calibration-detail").textContent = `Age-local · effective N ${result.effectiveN.toFixed(0)}`;
+  document.querySelector("#calibration-detail").textContent = `Age-local · effective N ${result.effectiveN.toFixed(0)} · ceiling ${result.maxPercentile.toFixed(1)}th`;
+  document.querySelector("#result-model-version").textContent = result.model.model_version;
+  document.querySelector("#result-test-cohort").textContent = `${result.model.test_rows.toLocaleString()} eyes / ${result.model.test_patients.toLocaleString()} patients (${result.model.tier})`;
+  document.querySelector("#result-limitations").textContent = `Single-center IOLMaster 700 reference, ages ${result.model.display_age_range}; clinical indication not verified by EMR; external and postoperative outcome validation not completed.`;
+  const resultWarning = document.querySelector("#result-warning");
+  const warnings = [result.modelSelectionWarning, result.calibrationWarning].filter(Boolean);
+  resultWarning.textContent = warnings.join(" ");
+  resultWarning.hidden = warnings.length === 0;
   document.querySelector("#model-version").textContent = result.model.model_version;
   document.querySelector("#reference-patients").textContent = `${result.model.reference_rows.toLocaleString()} / ${result.model.reference_patients.toLocaleString()}`;
   document.querySelector("#derivation-patients").textContent = `${result.model.derivation_rows.toLocaleString()} / ${result.model.derivation_patients.toLocaleString()}`;
@@ -126,14 +133,20 @@ function resetResults() {
   resultContent.hidden = true;
   validationMessage.textContent = "";
   document.querySelector("#result-model-chip").hidden = true;
+  document.querySelector("#result-warning").hidden = true;
 }
 
 function updateModelPreview() {
   if (!modelBundle) return;
   const selected = BiometryOODCore.selectModel(modelBundle, readInputs());
+  const values = readInputs();
+  const warning = BiometryOODCore.modelSelectionWarning(modelBundle, values);
   modelPreview.textContent = selected
     ? `${selected.stratum_label} / ${selected.tier} model selected${selected.tier === "Core" ? " · add both WTW and CCT for Extended" : ""}`
     : "No reference model is available for this age.";
+  const selectionWarning = document.querySelector("#model-selection-warning");
+  selectionWarning.textContent = warning;
+  selectionWarning.hidden = !warning;
 }
 
 form.addEventListener("submit", (event) => {
@@ -147,6 +160,7 @@ form.addEventListener("submit", (event) => {
 
 form.addEventListener("input", () => {
   exampleCaption.hidden = true;
+  document.querySelector("#model-selection-warning").hidden = true;
   updateModelPreview();
 });
 

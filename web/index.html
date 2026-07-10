@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Research-use age-adjusted biometry out-of-distribution calculator">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>Biometry OOD Explorer</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -17,6 +19,19 @@
       <div class="model-state" id="model-state" role="status">Loading model</div>
     </div>
   </header>
+
+  <aside class="governance-band" aria-label="Privacy and intended use">
+    <div class="content-width governance-layout">
+      <div>
+        <strong>Browser-only processing</strong>
+        <span>All calculations run in this browser. Entered biometry values are not transmitted or stored by this application.</span>
+      </div>
+      <div>
+        <strong>Research and education use only</strong>
+        <span>Do not use this result as the sole basis for clinical decisions, IOL selection, or prescribing.</span>
+      </div>
+    </div>
+  </aside>
 
   <main>
     <section class="input-band" aria-labelledby="input-heading">
@@ -67,6 +82,7 @@
             <div class="form-feedback">
               <p class="example-caption" id="example-caption" hidden></p>
               <p class="model-preview" id="model-preview">Age is modeled continuously; optional inputs select Core or Extended.</p>
+              <p class="model-selection-warning" id="model-selection-warning" aria-live="polite" hidden></p>
               <p class="validation-message" id="validation-message" aria-live="polite"></p>
             </div>
             <button type="submit" class="button button-primary" id="calculate-button" disabled>Calculate OOD</button>
@@ -91,6 +107,7 @@
         </div>
 
         <div class="result-content" id="result-content" hidden>
+          <div class="result-warning" id="result-warning" role="status" hidden></div>
           <div class="primary-results">
             <div class="percentile-result">
               <span class="metric-label">Age-adjusted percentile</span>
@@ -165,6 +182,21 @@
             <strong>Descriptive category, not a clinical threshold.</strong>
             <span>Anatomical rarity does not establish postoperative prediction error, measurement failure, or the best formula.</span>
           </div>
+
+          <section class="result-provenance" aria-label="Model provenance and applicability">
+            <div>
+              <span>Model version</span>
+              <strong id="result-model-version">-</strong>
+            </div>
+            <div>
+              <span>Internal untouched test cohort</span>
+              <strong id="result-test-cohort">-</strong>
+            </div>
+            <div class="result-provenance-wide">
+              <span>Applicability limits</span>
+              <strong id="result-limitations">Single-center IOLMaster 700 reference; external and postoperative outcome validation not completed.</strong>
+            </div>
+          </section>
         </div>
       </div>
     </section>

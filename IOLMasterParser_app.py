@@ -38,6 +38,12 @@ OOD_OUTPUT_COLUMNS = [
     "OOD_Core_Sensitivity_Percentile", "OOD_Core_Sensitivity_Status",
     "OOD_Model_Selection_Warning",
     "OOD_Age_Stratum", "OOD_Model_Tier", "OOD_Model_Version", "OOD_Distance",
+    "AL_Conditional_Percentile", "AL_Conditional_Status",
+    "AL_Conditional_Reference_Context", "AL_Conditional_Largest_Deviations",
+    "AL_Conditional_Effective_N", "AL_Conditional_Max_Percentile",
+    "AL_Conditional_Calibration_Warning",
+    "AL_Conditional_Core_Sensitivity_Percentile",
+    "AL_Conditional_Core_Sensitivity_Status", "AL_Conditional_Distance",
 ]
 
 OUTPUT_COLUMNS = SOURCE_COLUMNS + OOD_OUTPUT_COLUMNS
@@ -49,6 +55,9 @@ NUMERIC_COLUMNS = {
     "OOD_Distance", "OOD_Percentile", "OOD_Local_Calibration_Effective_N",
     "OOD_Local_Calibration_Max_Percentile",
     "OOD_Core_Sensitivity_Percentile",
+    "AL_Conditional_Distance", "AL_Conditional_Percentile",
+    "AL_Conditional_Effective_N", "AL_Conditional_Max_Percentile",
+    "AL_Conditional_Core_Sensitivity_Percentile",
 }
 
 TEXT_COLUMNS = {
@@ -56,6 +65,9 @@ TEXT_COLUMNS = {
     "OOD_Status", "OOD_Reference_Context", "OOD_Largest_Marginal_Deviations",
     "OOD_Calibration_Warning", "OOD_Model_Selection_Warning",
     "OOD_Core_Sensitivity_Status", "OOD_Model_Version", "OOD_Age_Stratum", "OOD_Model_Tier",
+    "AL_Conditional_Status", "AL_Conditional_Reference_Context",
+    "AL_Conditional_Largest_Deviations", "AL_Conditional_Calibration_Warning",
+    "AL_Conditional_Core_Sensitivity_Status",
 }
 
 CSV_ENCODINGS = ("utf-8-sig", "utf-16", "cp949")

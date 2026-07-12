@@ -10,7 +10,7 @@ ALLOWED_FILES = (
     ("web/app.js", "web/app.js"),
     ("web/ood-core.js", "web/ood-core.js"),
     ("web/demo-examples.js", "web/demo-examples.js"),
-    ("models/biometry_ood_bilateral_v31.json", "models/biometry_ood_bilateral_v31.json"),
+    ("models/biometry_ood_bilateral_v32.json", "models/biometry_ood_bilateral_v32.json"),
 )
 ROOT_INDEX = """<!doctype html>
 <html lang="en">

@@ -1,5 +1,41 @@
 # Changelog
 
+## 2026-07-12
+
+### Added
+
+- Added the V3.2 secondary Age+AL-conditioned geometry score to the Python runtime, Excel export, and browser calculator.
+- Added joint age-and-AL empirical calibration, untouched-test validation by age and AL band, and an explanatory report.
+- Added regression tests that keep all V3.1 Overall OOD geometry and calibration inputs unchanged.
+- Added a reproducible marginal-adjustment analysis for the postoperative pilot, including patient-cluster inference, leave-one-patient-out discrimination, machine-readable results, and a clinician-facing summary.
+- Added a Korean guide to continuous age adjustment, robust splines, local MAD scaling, the transition from age strata, and the rationale for the age anchors.
+- Added patient-cluster bootstrap confidence intervals for the V3.2 conditional-score category proportions.
+
+### Changed
+
+- Switched active desktop, web, Windows-build, and static-deployment artifacts to `continuous-age-bilateral-v3.2.0`.
+- Displayed the new metric as a clearly separated research score; AL selects the conditional reference but is excluded from its distance.
+- Added AL-conditioned percentile, status, reference context, dominant residuals, local effective N, calibration ceiling, warnings, and Core-sensitivity fields to the desktop XLSX output.
+- Preserved the V3.1 Overall age adjustment, robust geometry, and calibration values exactly instead of refitting them under a newer scikit-learn version.
+- Updated the web result view with a dedicated `Geometry given age + AL` card and conditional calibration details while retaining Overall OOD as the primary result.
+- Updated the Windows build, static-site allowlist, and R2 publisher to package the V3.2 model artifact.
+- Made the JavaScript regression suite compatible with the repository's ES module configuration.
+
+### Research findings
+
+- In 85 routine pilot eyes, formula spread increased from 0.84 D in Typical eyes to 1.31 D in Rare eyes (`rho=0.393`, `p=0.0002`).
+- The OOD association with formula spread remained after adjustment for absolute AL and K deviations and after adjustment for all six marginal deviations; the combined six-variable model added `Delta R2=0.044` (`p=0.038`).
+- Leave-one-patient-out discrimination for formula spread at least 1 D improved from AUC 0.737 to 0.809 in the primary marginal model.
+- OOD did not show a consistent association with postoperative prediction error, so the defensible use remains formula-disagreement screening rather than refractive-error prediction.
+
+### Validation
+
+- Selected an 8-year age bandwidth and 1.0 standardized-AL bandwidth for both Core and Extended conditional calibration using the held-out tuning set.
+- On the untouched test set, conditional-percentile uniformity KS was 0.043 for Core and 0.032 for Extended; Rare proportions were 1.33% and 1.49%, respectively.
+- Patient-cluster bootstrap 95% intervals for the conditional Rare proportion were 0.7-2.1% for Core and 0.8-2.3% for Extended.
+- Confirmed that V3.2 reproduces all V3.1 Overall demo distances, percentiles, and categories while adding the conditional result in parallel.
+- Passed the 15-test Python suite, JavaScript core regression suite, and exact seven-file static deployment build.
+
 ## 2026-07-11
 
 ### Added

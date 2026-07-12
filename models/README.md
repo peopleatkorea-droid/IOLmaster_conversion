@@ -6,7 +6,7 @@
 
 `biometry_ood_continuous_v3.json` is the legacy one-eye V3 bundle used for sensitivity comparison.
 
-`biometry_ood_bilateral_v31.json` is the active two-model bundle. It includes all eligible eyes, keeps fellow eyes in the same patient-level derivation/tuning/calibration/test split, and reports cluster-aware effective reference size.
+`biometry_ood_bilateral_v32.json` is the active two-model bundle. It includes all eligible eyes, keeps fellow eyes in the same patient-level derivation/tuning/calibration/test split, and reports cluster-aware effective reference size. V3.2 preserves the Overall OOD score and adds a secondary age-and-AL-conditioned geometry score that excludes AL itself from the conditional distance.
 
 The artifact contains aggregate model parameters and reference distances only. It must not contain patient identifiers or row-level biometry records. Any model change requires a new semantic version and a regenerated validation report.
 

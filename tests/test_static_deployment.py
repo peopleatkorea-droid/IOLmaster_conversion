@@ -9,7 +9,7 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 BUILD_SCRIPT = REPOSITORY_ROOT / "deployment" / "build_static_site.py"
 EXPECTED_FILES = {
     "index.html",
-    "models/biometry_ood_bilateral_v31.json",
+    "models/biometry_ood_bilateral_v32.json",
     "web/app.js",
     "web/demo-examples.js",
     "web/index.html",

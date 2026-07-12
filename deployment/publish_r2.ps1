@@ -256,7 +256,7 @@ Write-Host "Building allowlisted static site for $Version..."
 & $python (Join-Path $RepositoryRoot "deployment\build_static_site.py") --output $ReleaseRoot
 if ($LASTEXITCODE -ne 0) { throw "Static site build failed." }
 
-$model = Get-Content -LiteralPath (Join-Path $ReleaseRoot "models\biometry_ood_bilateral_v31.json") -Raw -Encoding UTF8 | ConvertFrom-Json
+$model = Get-Content -LiteralPath (Join-Path $ReleaseRoot "models\biometry_ood_bilateral_v32.json") -Raw -Encoding UTF8 | ConvertFrom-Json
 $sourceCommit = (& git -C $RepositoryRoot rev-parse HEAD 2>$null)
 if ($LASTEXITCODE -ne 0) { $sourceCommit = "unknown" }
 # Reproducibility is determined by files that can change the public bundle;
@@ -264,7 +264,7 @@ if ($LASTEXITCODE -ne 0) { $sourceCommit = "unknown" }
 $sourceDirty = -not [string]::IsNullOrWhiteSpace((
   & git -C $RepositoryRoot status --porcelain -- `
     web `
-    models/biometry_ood_bilateral_v31.json `
+    models/biometry_ood_bilateral_v32.json `
     deployment/build_static_site.py 2>$null | Out-String
 ))
 if ($sourceDirty -and -not $AllowDirtySource -and -not $DryRun) {

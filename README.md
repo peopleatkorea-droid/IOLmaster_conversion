@@ -266,6 +266,33 @@ py -3 deployment\build_static_site.py
 
 K-ERA 홈페이지의 고정 주소 `/tools/biometry-ood`는 저장소 파일을 복사하지 않고 `releases.k-era.org`의 버전별 정적 release를 프록시합니다. 게시 전 전체 테스트와 실제 R2 object 목록을 확인하는 dry-run은 credential 없이 실행할 수 있습니다.
 
+#### 운영자용 빠른 메모
+
+웹 화면·계산 로직·공개 모델을 수정한 뒤에는 Codex에 다음 한 줄로 요청합니다.
+
+```text
+오늘 변경 commit/push하고, 웹 배포도 v3.1.1로 진행해줘.
+```
+
+Codex는 변경 파일과 테스트를 확인한 뒤 commit/push하고, `biometry-ood-v3.1.1` 태그를 push해 GitHub Actions 배포를 시작합니다. 다음 배포에서는 `v3.1.2`, `v3.1.3`처럼 사용하지 않은 새 patch version으로 올립니다.
+
+README, 연구 스크립트 또는 테스트만 수정했고 공개 웹 bundle이 바뀌지 않았다면 다음처럼 요청합니다.
+
+```text
+오늘 변경을 changelog에 정리하고 commit/push해줘. 웹 배포 태그는 만들지 마.
+```
+
+직접 실행할 때의 최소 명령은 다음과 같습니다.
+
+```powershell
+git add -A
+git commit -m "Update Biometry OOD Explorer"
+git tag biometry-ood-v3.1.1
+git push origin master biometry-ood-v3.1.1
+```
+
+배포 태그가 필요한 공개 bundle source는 `web/index.html`, `web/styles.css`, `web/app.js`, `web/ood-core.js`, `web/demo-examples.js`, `models/biometry_ood_bilateral_v31.json`입니다. 단순 commit/push는 실서비스를 변경하지 않으며, 새 `biometry-ood-v*` 태그를 push할 때만 자동 배포·검증·stable 전환이 실행됩니다.
+
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File deployment\publish_r2.ps1 `
   -Version v3.1.0-preview `

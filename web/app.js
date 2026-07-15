@@ -1,4 +1,4 @@
-const MODEL_URL = "../models/biometry_ood_bilateral_v31.json";
+const MODEL_URL = "../models/biometry_ood_bilateral_v32.json";
 
 const form = document.querySelector("#calculator-form");
 const calculateButton = document.querySelector("#calculate-button");
@@ -95,6 +95,13 @@ function showResult(result) {
   document.querySelector("#expected-lt").textContent = `${result.expectedLt.toFixed(3)} mm`;
   document.querySelector("#adjusted-lt").textContent = `${result.adjustedLt >= 0 ? "+" : ""}${result.adjustedLt.toFixed(3)} mm`;
   document.querySelector("#dominant-deviation").textContent = result.dominant;
+  document.querySelector("#conditional-percentile").textContent = result.alConditional.percentile.toFixed(1);
+  document.querySelector("#conditional-status").textContent = result.alConditional.status;
+  document.querySelector("#conditional-status").className = result.alConditional.statusClass;
+  document.querySelector("#conditional-context").textContent = `${result.alConditional.rarity.value} · ${result.alConditional.rarity.caption}`;
+  document.querySelector("#conditional-deviation").textContent = result.alConditional.dominant;
+  document.querySelector("#conditional-distance").textContent = result.alConditional.distance.toFixed(3);
+  document.querySelector("#conditional-calibration").textContent = `Age+AL-local · effective N ${result.alConditional.effectiveN.toFixed(0)} · ceiling ${result.alConditional.maxPercentile.toFixed(1)}th`;
   document.querySelector("#selected-model-detail").textContent = `${result.model.stratum_label} / ${result.model.tier}`;
   document.querySelector("#result-model-chip").textContent = `${result.model.stratum_label} · ${result.model.tier}`;
   document.querySelector("#result-model-chip").hidden = false;
@@ -106,7 +113,11 @@ function showResult(result) {
   document.querySelector("#result-test-cohort").textContent = `${result.model.test_rows.toLocaleString()} eyes / ${result.model.test_patients.toLocaleString()} patients (${result.model.tier})`;
   document.querySelector("#result-limitations").textContent = `Single-center IOLMaster 700 reference, ages ${result.model.display_age_range}; clinical indication not verified by EMR; external and postoperative outcome validation not completed.`;
   const resultWarning = document.querySelector("#result-warning");
-  const warnings = [result.modelSelectionWarning, result.calibrationWarning].filter(Boolean);
+  const warnings = [
+    result.modelSelectionWarning,
+    result.calibrationWarning,
+    result.alConditional.calibrationWarning,
+  ].filter(Boolean);
   resultWarning.textContent = warnings.join(" ");
   resultWarning.hidden = warnings.length === 0;
   document.querySelector("#model-version").textContent = result.model.model_version;

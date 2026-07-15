@@ -355,6 +355,28 @@ input[aria-invalid="true"] { border-color: var(--red); }
 .deviation-row > span { margin: 0; }
 .deviation-row strong { text-align: right; }
 
+.conditional-card {
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px solid #b9ced2;
+  background: #f1f7f7;
+}
+.conditional-heading-row { display: flex; justify-content: space-between; gap: 18px; align-items: end; }
+.conditional-heading-row h3 { margin-top: 3px; font-size: 21px; color: var(--navy); }
+.conditional-kicker { color: #277275; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.conditional-explainer { color: var(--muted); font-size: 11px; text-align: right; }
+.conditional-grid { display: grid; grid-template-columns: 0.8fr 1fr 1.6fr; margin-top: 16px; border-top: 1px solid #c7dadd; border-bottom: 1px solid #c7dadd; }
+.conditional-grid > div { min-height: 84px; padding: 14px 16px; border-right: 1px solid #c7dadd; }
+.conditional-grid > div:first-child { padding-left: 0; }
+.conditional-grid > div:last-child { border-right: 0; }
+.conditional-grid span,
+.conditional-deviation > span { display: block; color: var(--muted); font-size: 11px; }
+.conditional-grid strong { display: block; margin-top: 6px; font-size: 18px; }
+.conditional-grid > div:first-child strong { color: var(--navy); font-size: 31px; }
+.conditional-grid small { margin-left: 2px; font-size: 16px; }
+.conditional-deviation { display: flex; justify-content: space-between; gap: 18px; padding-top: 14px; }
+.conditional-deviation strong { font-size: 13px; text-align: right; }
+
 .anatomy-profile { padding: 22px 0 8px; border-bottom: 1px solid var(--line); }
 .profile-heading-row { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; margin-bottom: 15px; }
 .profile-heading-row > span { color: var(--muted); font-size: 11px; }
@@ -452,6 +474,13 @@ footer { padding: 18px 0; background: var(--navy); color: #c8d7df; font-size: 12
   .detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .detail-item:nth-child(2) { border-right: 0; }
   .detail-item:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+  .conditional-heading-row,
+  .conditional-deviation { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .conditional-explainer,
+  .conditional-deviation strong { text-align: left; }
+  .conditional-grid { grid-template-columns: 1fr; }
+  .conditional-grid > div { min-height: auto; padding: 12px 0; border-right: 0; border-bottom: 1px solid #c7dadd; }
+  .conditional-grid > div:last-child { border-bottom: 0; }
   .deviation-row,
   .interpretation-note { align-items: flex-start; flex-direction: column; gap: 6px; }
   .deviation-row strong { text-align: left; }

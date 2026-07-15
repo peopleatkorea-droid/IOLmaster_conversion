@@ -94,16 +94,16 @@
     return { lower, upper };
   }
 
-  function calibrationWarning(calibration) {
+  function calibrationWarning(calibration, label = "Age-local") {
     const warnings = [];
     if (calibration.maxPercentile < 97.5) {
       warnings.push(
-        `Age-local calibration can reach at most ${calibration.maxPercentile.toFixed(1)} percentile at this age, so the Rare threshold is not attainable.`,
+        `${label} calibration can reach at most ${calibration.maxPercentile.toFixed(1)} percentile here, so the Rare threshold is not attainable.`,
       );
     }
     if (calibration.effectiveN < 50) {
       warnings.push(
-        `Age-local calibration effective N is ${calibration.effectiveN.toFixed(0)}; percentile precision is limited.`,
+        `${label} calibration effective N is ${calibration.effectiveN.toFixed(0)}; percentile precision is limited.`,
       );
     }
     return warnings.join(" ");
@@ -148,6 +148,88 @@
       effectiveN: distances.length,
       maxPercentile: 100,
       ageLocal: false,
+    };
+  }
+
+  function alConditionalCalibration(geometry, age, standardizedAl, distance) {
+    let totalWeight = 0;
+    let belowWeight = 0;
+    const clusterWeights = new Map();
+    geometry.calibration_age_al_distance.forEach((pair, pairIndex) => {
+      const [calibrationAge, calibrationAl, calibrationDistance] = pair;
+      const clusterId = pair.length > 3 ? pair[3] : pairIndex;
+      const ageDelta = (calibrationAge - age) / geometry.age_bandwidth_years;
+      const alDelta = (calibrationAl - standardizedAl) / geometry.al_bandwidth_standardized;
+      const weight = Math.exp(-0.5 * (ageDelta * ageDelta + alDelta * alDelta));
+      totalWeight += weight;
+      clusterWeights.set(clusterId, (clusterWeights.get(clusterId) || 0) + weight);
+      if (calibrationDistance < distance) belowWeight += weight;
+    });
+    const denominator = totalWeight + 1;
+    const effectiveDenominator = [...clusterWeights.values()].reduce(
+      (sum, weight) => sum + weight * weight,
+      0,
+    );
+    return {
+      percentile: (100 * belowWeight) / denominator,
+      tailProbability: (1 + totalWeight - belowWeight) / denominator,
+      effectiveN: effectiveDenominator ? (totalWeight * totalWeight) / effectiveDenominator : 0,
+      maxPercentile: (100 * totalWeight) / denominator,
+      ageLocal: true,
+    };
+  }
+
+  function calculateAlConditional(model, values, vector) {
+    const geometry = model.al_conditional_geometry;
+    if (!geometry) return null;
+    const alDelta = vector[0] - geometry.conditioner_location;
+    const expectedTargets = geometry.target_location.map(
+      (location, index) => location + geometry.regression_coefficients[index] * alDelta,
+    );
+    const residual = vector.slice(1).map((value, index) => value - expectedTargets[index]);
+    const projected = matrixVector(geometry.conditional_precision, residual);
+    const distance = Math.sqrt(Math.max(
+      0,
+      residual.reduce((sum, value, index) => sum + value * projected[index], 0),
+    ));
+    const calibration = alConditionalCalibration(geometry, values.age, vector[0], distance);
+    const percentile = calibration.percentile;
+    let status = "Typical geometry given AL";
+    let statusClass = "status-routine";
+    if (percentile >= model.score_thresholds_percentile.score_1_upper) {
+      status = "Rare geometry given AL";
+      statusClass = "status-ood";
+    } else if (percentile >= model.score_thresholds_percentile.score_0_upper) {
+      status = "Uncommon geometry given AL";
+      statusClass = "status-uncommon";
+    }
+    const zScores = residual.map(
+      (value, index) => value / geometry.conditional_standard_deviations[index],
+    );
+    const dominant = zScores
+      .map((value, index) => ({ label: geometry.target_labels[index], value }))
+      .sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
+      .slice(0, 2)
+      .map((item) => `${item.label} ${item.value >= 0 ? "+" : ""}${item.value.toFixed(1)} conditional SD`)
+      .join("; ");
+    return {
+      distance,
+      percentile,
+      status,
+      statusClass,
+      dominant,
+      rarity: raritySummary(
+        percentile,
+        calibration.tailProbability,
+        true,
+        geometry.reference_unit || null,
+      ),
+      effectiveN: calibration.effectiveN,
+      maxPercentile: calibration.maxPercentile,
+      calibrationWarning: calibrationWarning(calibration, "Age+AL-local"),
+      calibration,
+      method: geometry.calibration_method,
+      coreSensitivity: null,
     };
   }
 
@@ -300,6 +382,7 @@
         q97_5: quantile(reference, 0.975),
       }];
     });
+    const alConditional = calculateAlConditional(model, values, vector);
 
     return {
       expectedAcd: expectedByAge(model, "ACD", values.age),
@@ -324,6 +407,7 @@
       profile,
       model,
       coreSensitivity: null,
+      alConditional,
     };
   }
 
@@ -340,6 +424,13 @@
         status: coreResult.status,
         difference: result.percentile - coreResult.percentile,
       };
+      if (result.alConditional && coreResult.alConditional) {
+        result.alConditional.coreSensitivity = {
+          percentile: coreResult.alConditional.percentile,
+          status: coreResult.alConditional.status,
+          difference: result.alConditional.percentile - coreResult.alConditional.percentile,
+        };
+      }
     }
     return result;
   }
@@ -348,6 +439,8 @@
     calculate,
     calculateForModel,
     calibratedPercentile,
+    alConditionalCalibration,
+    calculateAlConditional,
     calibrationWarning,
     expectedByAge,
     percentileOf,

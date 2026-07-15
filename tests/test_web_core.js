@@ -1,10 +1,15 @@
-const fs = require("fs");
-const assert = require("assert");
-const path = require("path");
-const core = require("../web/ood-core.js");
-const demoExamples = require("../web/demo-examples.js");
+import fs from "node:fs";
+import assert from "node:assert";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const modelPath = path.resolve(__dirname, "..", "models", "biometry_ood_bilateral_v31.json");
+await import("../web/ood-core.js");
+await import("../web/demo-examples.js");
+const core = globalThis.BiometryOODCore;
+const demoExamples = globalThis.BiometryOODExamples;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const modelPath = path.resolve(__dirname, "..", "models", "biometry_ood_bilateral_v32.json");
 const model = JSON.parse(fs.readFileSync(modelPath, "utf8"));
 const result = core.calculate(model, {
   age: 80,
@@ -22,6 +27,10 @@ assert.strictEqual(result.status, "Uncommon anatomy");
 assert.strictEqual(result.dominant, "ACD -2.8 SD; LT +2.3 SD");
 assert.strictEqual(result.model.model_key, "bilateral_core");
 assert.strictEqual(result.profile.length, 4);
+assert(Math.abs(result.alConditional.percentile - 96.84711041646872) < 1e-8);
+assert.strictEqual(result.alConditional.status, "Uncommon geometry given AL");
+assert(!result.alConditional.dominant.startsWith("AL "));
+assert(result.alConditional.effectiveN > 250);
 
 const extended = core.calculate(model, {
   age: 80,
@@ -41,6 +50,7 @@ assert.deepStrictEqual(extended.rarity, {
 assert(Math.abs(extended.coreSensitivity.percentile - result.percentile) < 1e-10);
 assert(extended.maxPercentile > 99);
 assert.strictEqual(extended.calibrationWarning, "");
+assert(extended.alConditional.coreSensitivity);
 
 const fallback = core.calculate(model, {
   age: 80,

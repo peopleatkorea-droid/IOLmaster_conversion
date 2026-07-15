@@ -1,4 +1,6 @@
+import json
 import unittest
+from pathlib import Path
 
 from biometry_ood import age_at_measurement, load_default_model, mean_k_from_radii
 
@@ -9,7 +11,7 @@ class BiometryOODTests(unittest.TestCase):
         cls.model = load_default_model()
 
     def test_model_provenance_and_size(self):
-        self.assertEqual(self.model.version, "continuous-age-bilateral-v3.1.0")
+        self.assertEqual(self.model.version, "continuous-age-bilateral-v3.2.0")
         self.assertEqual(len(self.model.models), 2)
         counts = {model.payload["model_key"]: len(model.reference_distances) for model in self.model.models}
         self.assertEqual(
@@ -20,6 +22,8 @@ class BiometryOODTests(unittest.TestCase):
             },
         )
         for model in self.model.models:
+            self.assertEqual(model.payload["schema_version"], 5)
+            self.assertIn("al_conditional_geometry", model.payload)
             self.assertEqual(model.reference_distances, sorted(model.reference_distances))
             self.assertEqual(model.payload["reference_patients"], 681)
             self.assertGreater(model.payload["reference_rows"], model.payload["reference_patients"])
@@ -48,11 +52,17 @@ class BiometryOODTests(unittest.TestCase):
         self.assertIsNone(result["OOD_Calibration_Warning"])
         self.assertIsNone(result["OOD_Model_Selection_Warning"])
         self.assertEqual(len(result["OOD_Feature_Profile"]), 4)
+        self.assertAlmostEqual(result["AL_Conditional_Percentile"], 96.847, places=3)
+        self.assertEqual(
+            result["AL_Conditional_Status"], "Uncommon geometry given AL"
+        )
+        self.assertNotIn("AL ", result["AL_Conditional_Largest_Deviations"])
+        self.assertGreater(result["AL_Conditional_Effective_N"], 250)
 
     def test_wtw_cct_select_extended_model(self):
         result = self.model.score_values(80, 23.61, 40.80, 1.94, 5.58, 10.99, 0.601)
         self.assertEqual(result["OOD_Model_Tier"], "Extended")
-        self.assertEqual(result["OOD_Model_Version"], "bilateral-extended-v3.1.0")
+        self.assertEqual(result["OOD_Model_Version"], "bilateral-extended-v3.2.0")
         self.assertAlmostEqual(result["OOD_Percentile"], 95.725, places=3)
         self.assertEqual(
             result["OOD_Reference_Context"],
@@ -60,6 +70,7 @@ class BiometryOODTests(unittest.TestCase):
         )
         self.assertAlmostEqual(result["OOD_Core_Sensitivity_Percentile"], 92.212, places=3)
         self.assertEqual(result["OOD_Core_Sensitivity_Status"], "Uncommon anatomy")
+        self.assertIsNotNone(result["AL_Conditional_Core_Sensitivity_Percentile"])
 
     def test_invalid_optional_input_warns_before_core_fallback(self):
         result = self.model.score_values(80, 23.61, 40.80, 1.94, 5.58, 7.5, 0.601)
@@ -111,6 +122,31 @@ class BiometryOODTests(unittest.TestCase):
                 for j in range(size):
                     value = sum(covariance[i][k] * precision[k][j] for k in range(size))
                     self.assertAlmostEqual(value, 1.0 if i == j else 0.0, places=8)
+
+    def test_v32_preserves_v31_overall_score_inputs_exactly(self):
+        root = Path(__file__).resolve().parents[1]
+        legacy = json.loads(
+            (root / "models" / "biometry_ood_bilateral_v31.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        current = self.model.payload
+        invariant_fields = (
+            "inputs",
+            "age_adjustment",
+            "feature_scalers",
+            "robust_location",
+            "robust_covariance",
+            "precision_matrix",
+            "feature_standard_deviations",
+            "calibration_distances",
+            "calibration_age_distance",
+            "age_calibration_bandwidth_years",
+            "marginal_reference_values",
+        )
+        for old_model, new_model in zip(legacy["models"], current["models"]):
+            for field in invariant_fields:
+                self.assertEqual(old_model[field], new_model[field], field)
 
 
 if __name__ == "__main__":

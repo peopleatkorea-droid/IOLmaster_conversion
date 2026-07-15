@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-MODEL_RELATIVE_PATH = Path("models") / "biometry_ood_bilateral_v31.json"
+MODEL_RELATIVE_PATH = Path("models") / "biometry_ood_bilateral_v32.json"
 
 
 def resource_path(relative_path: Path) -> Path:
@@ -97,16 +97,16 @@ def approximate_frequency_range(tail_probability):
     return int(lower), int(upper)
 
 
-def calibration_warning(effective_n, max_percentile):
+def calibration_warning(effective_n, max_percentile, label="Age-local"):
     warnings = []
     if max_percentile < 97.5:
         warnings.append(
-            f"Age-local calibration can reach at most {max_percentile:.1f} percentile at this age, "
+            f"{label} calibration can reach at most {max_percentile:.1f} percentile here, "
             "so the Rare threshold is not attainable."
         )
     if effective_n < 50:
         warnings.append(
-            f"Age-local calibration effective N is {effective_n:.0f}; percentile precision is limited."
+            f"{label} calibration effective N is {effective_n:.0f}; percentile precision is limited."
         )
     return " ".join(warnings) or None
 
@@ -153,6 +153,7 @@ class BiometryOODModel:
         self.reference_unit = payload.get("reference_unit")
         self.feature_scalers = payload.get("feature_scalers")
         self.marginal_reference_values = payload.get("marginal_reference_values", {})
+        self.al_conditional_geometry = payload.get("al_conditional_geometry")
         self.score_thresholds = payload["score_thresholds_percentile"]
         self.age_adjustment = payload["age_adjustment"]
         self.input_ranges = payload["input_ranges"]
@@ -231,6 +232,97 @@ class BiometryOODModel:
             1.0 / max(1, len(self.reference_distances)),
         )
         return percentile, tail_probability, float(len(self.reference_distances)), 100.0
+
+    def al_conditional_result(self, age, vector):
+        geometry = self.al_conditional_geometry
+        if not geometry:
+            return None
+        al_delta = vector[0] - geometry["conditioner_location"]
+        expected_targets = [
+            location + coefficient * al_delta
+            for location, coefficient in zip(
+                geometry["target_location"], geometry["regression_coefficients"]
+            )
+        ]
+        residual = [
+            value - expected
+            for value, expected in zip(vector[1:], expected_targets)
+        ]
+        projected = _dot_matrix_vector(geometry["conditional_precision"], residual)
+        distance_squared = max(
+            0.0,
+            sum(value * projected[index] for index, value in enumerate(residual)),
+        )
+        distance = math.sqrt(distance_squared)
+
+        total_weight = 0.0
+        below_weight = 0.0
+        cluster_weights = {}
+        for pair_index, pair in enumerate(geometry["calibration_age_al_distance"]):
+            calibration_age, calibration_al, calibration_distance = pair[:3]
+            cluster_id = pair[3] if len(pair) > 3 else pair_index
+            age_delta = (calibration_age - age) / geometry["age_bandwidth_years"]
+            conditioned_al_delta = (
+                calibration_al - vector[0]
+            ) / geometry["al_bandwidth_standardized"]
+            weight = math.exp(
+                -0.5
+                * (age_delta * age_delta + conditioned_al_delta * conditioned_al_delta)
+            )
+            total_weight += weight
+            cluster_weights[cluster_id] = cluster_weights.get(cluster_id, 0.0) + weight
+            if calibration_distance < distance:
+                below_weight += weight
+        denominator = total_weight + 1.0
+        percentile = 100.0 * below_weight / denominator
+        tail_probability = (1.0 + total_weight - below_weight) / denominator
+        effective_denominator = sum(
+            weight * weight for weight in cluster_weights.values()
+        )
+        effective_n = (
+            total_weight * total_weight / effective_denominator
+            if effective_denominator > 0
+            else 0.0
+        )
+        max_percentile = 100.0 * total_weight / denominator
+
+        if percentile < self.score_thresholds["score_0_upper"]:
+            status = "Typical geometry given AL"
+        elif percentile < self.score_thresholds["score_1_upper"]:
+            status = "Uncommon geometry given AL"
+        else:
+            status = "Rare geometry given AL"
+        conditional_sd = geometry["conditional_standard_deviations"]
+        z_scores = [
+            value / conditional_sd[index] if conditional_sd[index] > 0 else 0.0
+            for index, value in enumerate(residual)
+        ]
+        ranked = sorted(
+            range(len(z_scores)), key=lambda index: abs(z_scores[index]), reverse=True
+        )[:2]
+        dominant = "; ".join(
+            f"{geometry['target_labels'][index]} {z_scores[index]:+.1f} conditional SD"
+            for index in ranked
+        )
+        return {
+            "distance": distance,
+            "percentile": percentile,
+            "status": status,
+            "reference_context": reference_context(
+                percentile,
+                len(geometry["calibration_age_al_distance"]),
+                tail_probability=tail_probability,
+                age_local=True,
+                reference_unit=geometry.get("reference_unit"),
+            ),
+            "largest_deviations": dominant,
+            "effective_n": effective_n,
+            "max_percentile": max_percentile,
+            "warning": calibration_warning(
+                effective_n, max_percentile, label="Age+AL-local"
+            ),
+            "method": geometry.get("calibration_method"),
+        }
 
     def _validate_range(self, name, value):
         lower, upper = self.input_ranges[name]
@@ -324,6 +416,8 @@ class BiometryOODModel:
                 }
             )
 
+        al_conditional = self.al_conditional_result(age, vector)
+
         return {
             "Age_at_Biometry": round(age, 3),
             "Mean_K": round(numeric["Mean_K"], 6),
@@ -349,6 +443,19 @@ class BiometryOODModel:
             "OOD_Model_Version": self.version,
             "OOD_Feature_Profile": profile,
             "OOD_Calibration_Method": self.calibration_method,
+            "AL_Conditional_Distance": round(al_conditional["distance"], 6),
+            "AL_Conditional_Percentile": round(al_conditional["percentile"], 3),
+            "AL_Conditional_Status": al_conditional["status"],
+            "AL_Conditional_Reference_Context": al_conditional["reference_context"],
+            "AL_Conditional_Largest_Deviations": al_conditional[
+                "largest_deviations"
+            ],
+            "AL_Conditional_Effective_N": round(al_conditional["effective_n"], 1),
+            "AL_Conditional_Max_Percentile": round(
+                al_conditional["max_percentile"], 3
+            ),
+            "AL_Conditional_Calibration_Warning": al_conditional["warning"],
+            "AL_Conditional_Method": al_conditional["method"],
         }
 
     def not_calculated(self, reason, age=None, mean_k=None):
@@ -371,6 +478,15 @@ class BiometryOODModel:
             "OOD_Model_Version": self.version,
             "OOD_Feature_Profile": [],
             "OOD_Calibration_Method": self.calibration_method,
+            "AL_Conditional_Distance": None,
+            "AL_Conditional_Percentile": None,
+            "AL_Conditional_Status": "Not calculated",
+            "AL_Conditional_Reference_Context": None,
+            "AL_Conditional_Largest_Deviations": reason,
+            "AL_Conditional_Effective_N": None,
+            "AL_Conditional_Max_Percentile": None,
+            "AL_Conditional_Calibration_Warning": None,
+            "AL_Conditional_Method": None,
         }
 
 
@@ -465,11 +581,19 @@ class BiometryOODSelector:
         )
         result["OOD_Core_Sensitivity_Percentile"] = None
         result["OOD_Core_Sensitivity_Status"] = None
+        result["AL_Conditional_Core_Sensitivity_Percentile"] = None
+        result["AL_Conditional_Core_Sensitivity_Status"] = None
         if model.tier == "Extended" and result["OOD_Status"] != "Not calculated":
             core = next(candidate for candidate in self.models_for_age(numeric_age) if candidate.tier == "Core")
             core_result = core.score_values(numeric_age, values)
             result["OOD_Core_Sensitivity_Percentile"] = core_result["OOD_Percentile"]
             result["OOD_Core_Sensitivity_Status"] = core_result["OOD_Status"]
+            result["AL_Conditional_Core_Sensitivity_Percentile"] = core_result[
+                "AL_Conditional_Percentile"
+            ]
+            result["AL_Conditional_Core_Sensitivity_Status"] = core_result[
+                "AL_Conditional_Status"
+            ]
         return result
 
     def score_row(self, row):
@@ -512,6 +636,17 @@ class BiometryOODSelector:
             "OOD_Model_Selection_Warning": None,
             "OOD_Feature_Profile": [],
             "OOD_Calibration_Method": None,
+            "AL_Conditional_Distance": None,
+            "AL_Conditional_Percentile": None,
+            "AL_Conditional_Status": "Not calculated",
+            "AL_Conditional_Reference_Context": None,
+            "AL_Conditional_Largest_Deviations": reason,
+            "AL_Conditional_Effective_N": None,
+            "AL_Conditional_Max_Percentile": None,
+            "AL_Conditional_Calibration_Warning": None,
+            "AL_Conditional_Method": None,
+            "AL_Conditional_Core_Sensitivity_Percentile": None,
+            "AL_Conditional_Core_Sensitivity_Status": None,
         }
 
 

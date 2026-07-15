@@ -1,0 +1,1259 @@
+{
+  "analysis": "Marginal adjustment of active V3.1 Extended OOD association",
+  "flow": {
+    "P150": {
+      "selected": 150,
+      "evaluable": 80,
+      "routine": 69,
+      "post_lvc": 11
+    },
+    "P40": {
+      "selected": 40,
+      "evaluable": 16,
+      "routine": 16,
+      "post_lvc": 0
+    }
+  },
+  "cohorts": {
+    "combined_routine": {
+      "n_eyes": 85,
+      "n_patients": 80
+    },
+    "pilot150_routine": {
+      "n_eyes": 69,
+      "n_patients": 65
+    },
+    "complete_nine_formula_routine": {
+      "n_eyes": 64,
+      "n_patients": 62
+    }
+  },
+  "literal_combined_routine_means": {
+    "AL_mm": 24.528141176470587,
+    "Mean_K_D": 44.51870588235294
+  },
+  "definitions": {
+    "primary_marginal_adjustment": "Absolute AL and Mean K marginal z deviations using the same age-adjusted, local-scale, robust-center reference as the active Extended OOD model.",
+    "literal_sensitivity": "Absolute raw AL and Mean K deviations from their combined routine pilot means.",
+    "coefficient_unit": "Outcome change per 10 OOD percentile points.",
+    "inference": "Patient-cluster CR1 sandwich covariance with t reference; partial-rank CI by 5000 patient-cluster bootstraps."
+  },
+  "results": {
+    "combined_routine_primary": {
+      "spread": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.07204478604603723,
+          "cluster_robust_se": 0.02716109184841888,
+          "cluster_robust_95_ci": [
+            0.017981985066272042,
+            0.1261075870258024
+          ],
+          "cluster_robust_p": 0.009653872814348222,
+          "base_r_squared": 0.28507885740500216,
+          "full_r_squared": 0.344014631986334,
+          "delta_r_squared": 0.05893577458133181,
+          "condition_number": 56.71711494528317
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.07521866964369833,
+          "cluster_robust_se": 0.029441550323099558,
+          "cluster_robust_95_ci": [
+            0.01661672961358391,
+            0.13382060967381276
+          ],
+          "cluster_robust_p": 0.012544219721060214,
+          "base_r_squared": 0.3325474229637413,
+          "full_r_squared": 0.39655647514187775,
+          "delta_r_squared": 0.06400905217813646,
+          "condition_number": 57.693976407191194
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.3630742378088286,
+          "patient_cluster_bootstrap_95_ci": [
+            0.1380649257481771,
+            0.5429473133056516
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.388784806064718,
+          "full_rmse": 0.37925392068755487,
+          "rmse_change_full_minus_base": -0.009530885377163123
+        }
+      },
+      "median_abs_pe": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.022560763535353356,
+          "cluster_robust_se": 0.03926532341667771,
+          "cluster_robust_95_ci": [
+            -0.055594907714126784,
+            0.1007164347848335
+          ],
+          "cluster_robust_p": 0.5672132631932746,
+          "base_r_squared": 0.1965728308061051,
+          "full_r_squared": 0.20007188703113354,
+          "delta_r_squared": 0.0034990562250284407,
+          "condition_number": 56.71711494528317
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.02153090987234904,
+          "cluster_robust_se": 0.03949860139360562,
+          "cluster_robust_95_ci": [
+            -0.05708908957534932,
+            0.1001509093200474
+          ],
+          "cluster_robust_p": 0.5872165528789374,
+          "base_r_squared": 0.19938746051387346,
+          "full_r_squared": 0.20256275724581918,
+          "delta_r_squared": 0.0031752967319457204,
+          "condition_number": 57.693976407191194
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.09606194452227561,
+          "patient_cluster_bootstrap_95_ci": [
+            -0.1258936690687959,
+            0.3023849597453973
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.5382602946452749,
+          "full_rmse": 0.5449970805190307,
+          "rmse_change_full_minus_base": 0.006736785873755813
+        }
+      },
+      "spread_ge_1d": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 39,
+          "odds_ratio_per_10_percentile": 3.139862270728565,
+          "cluster_robust_95_ci": [
+            1.3233335372436732,
+            7.449924604555225
+          ],
+          "cluster_robust_p": 0.01009963693872031
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 39,
+          "odds_ratio_per_10_percentile": 2.891819815170538,
+          "cluster_robust_95_ci": [
+            1.1664398483374836,
+            7.169355415396804
+          ],
+          "cluster_robust_p": 0.02247352543522827
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.6850613154960981,
+          "full_auc": 0.7591973244147158,
+          "auc_change_full_minus_base": 0.07413600891861771,
+          "base_brier": 0.21514678554195057,
+          "full_brier": 0.1931049235900194
+        }
+      },
+      "median_abs_pe_gt_0_5d": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 37,
+          "odds_ratio_per_10_percentile": 0.9634830823814068,
+          "cluster_robust_95_ci": [
+            0.6721051586678211,
+            1.381182152916604
+          ],
+          "cluster_robust_p": 0.8376308830560651
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 37,
+          "odds_ratio_per_10_percentile": 0.9528377257856733,
+          "cluster_robust_95_ci": [
+            0.6492484391465023,
+            1.3983856978908302
+          ],
+          "cluster_robust_p": 0.8027287815650606
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.6525900900900901,
+          "full_auc": 0.6244369369369369,
+          "auc_change_full_minus_base": -0.028153153153153143,
+          "base_brier": 0.22957959370302494,
+          "full_brier": 0.23938812768161027
+        }
+      }
+    },
+    "pilot150_routine_primary": {
+      "spread": {
+        "linear": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "estimate_per_10_percentile": 0.08984368934860074,
+          "cluster_robust_se": 0.02518380454809568,
+          "cluster_robust_95_ci": [
+            0.03953325619432921,
+            0.14015412250287226
+          ],
+          "cluster_robust_p": 0.000688915895877869,
+          "base_r_squared": 0.26912867465136403,
+          "full_r_squared": 0.335267809328169,
+          "delta_r_squared": 0.06613913467680499,
+          "condition_number": 70.96527019874605
+        },
+        "flexible_quadratic": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "estimate_per_10_percentile": 0.10560284051446758,
+          "cluster_robust_se": 0.022829224343573262,
+          "cluster_robust_95_ci": [
+            0.05999622205823991,
+            0.15120945897069527
+          ],
+          "cluster_robust_p": 1.867572338427447e-05,
+          "base_r_squared": 0.3390860647306251,
+          "full_r_squared": 0.42668304610370145,
+          "delta_r_squared": 0.08759698137307637,
+          "condition_number": 72.46834714675457
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.37023825970732643,
+          "patient_cluster_bootstrap_95_ci": [
+            0.1308800367031168,
+            0.556805213294733
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.36778751763677586,
+          "full_rmse": 0.354496682300142,
+          "rmse_change_full_minus_base": -0.013290835336633888
+        }
+      },
+      "median_abs_pe": {
+        "linear": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "estimate_per_10_percentile": 0.008843145018890275,
+          "cluster_robust_se": 0.0340619847229056,
+          "cluster_robust_95_ci": [
+            -0.05920349194697447,
+            0.07688978198475502
+          ],
+          "cluster_robust_p": 0.7959908651040581,
+          "base_r_squared": 0.18246673020269055,
+          "full_r_squared": 0.1830787318297692,
+          "delta_r_squared": 0.0006120016270786399,
+          "condition_number": 70.96527019874605
+        },
+        "flexible_quadratic": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "estimate_per_10_percentile": 0.008538911396221191,
+          "cluster_robust_se": 0.03371090473929106,
+          "cluster_robust_95_ci": [
+            -0.05880636267533941,
+            0.07588418546778179
+          ],
+          "cluster_robust_p": 0.8008496854427619,
+          "base_r_squared": 0.1884707477425347,
+          "full_r_squared": 0.18901776204752407,
+          "delta_r_squared": 0.0005470143049893794,
+          "condition_number": 72.46834714675457
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.14682873636586832,
+          "patient_cluster_bootstrap_95_ci": [
+            -0.11145178301451207,
+            0.38217985775074004
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.39360820631620685,
+          "full_rmse": 0.3996657360355612,
+          "rmse_change_full_minus_base": 0.00605752971935436
+        }
+      },
+      "spread_ge_1d": {
+        "linear": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "events": 31,
+          "odds_ratio_per_10_percentile": 3.3105341568599043,
+          "cluster_robust_95_ci": [
+            1.187346444526663,
+            9.230361074694748
+          ],
+          "cluster_robust_p": 0.022843459288628916
+        },
+        "flexible_quadratic": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "events": 31,
+          "odds_ratio_per_10_percentile": 3.0357508673696847,
+          "cluster_robust_95_ci": [
+            1.0266149246120457,
+            8.976864750157814
+          ],
+          "cluster_robust_p": 0.0448569612423821
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.6536502546689303,
+          "full_auc": 0.7385398981324278,
+          "auc_change_full_minus_base": 0.08488964346349748,
+          "base_brier": 0.2226627950129568,
+          "full_brier": 0.19930674231872636
+        }
+      },
+      "median_abs_pe_gt_0_5d": {
+        "linear": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "events": 26,
+          "odds_ratio_per_10_percentile": 0.8960525897463719,
+          "cluster_robust_95_ci": [
+            0.5426164534010368,
+            1.4797012485682315
+          ],
+          "cluster_robust_p": 0.6634880514608934
+        },
+        "flexible_quadratic": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "events": 26,
+          "odds_ratio_per_10_percentile": 0.8613321765903451,
+          "cluster_robust_95_ci": [
+            0.5299815875984295,
+            1.399846967876172
+          ],
+          "cluster_robust_p": 0.541351930463492
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.5769230769230769,
+          "full_auc": 0.5491949910554562,
+          "auc_change_full_minus_base": -0.027728085867620655,
+          "base_brier": 0.2291860726031254,
+          "full_brier": 0.24009318861723167
+        }
+      }
+    },
+    "combined_routine_all_six_marginals": {
+      "spread": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.07646600531321654,
+          "cluster_robust_se": 0.03625136386852803,
+          "cluster_robust_95_ci": [
+            0.004309470479976041,
+            0.14862254014645704
+          ],
+          "cluster_robust_p": 0.03808317576914675,
+          "base_r_squared": 0.43369739606257574,
+          "full_r_squared": 0.4780825998700894,
+          "delta_r_squared": 0.04438520380751365,
+          "condition_number": 69.04527239058523
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.06951943889252638,
+          "cluster_robust_se": 0.03224555455889595,
+          "cluster_robust_95_ci": [
+            0.005336268041784845,
+            0.13370260974326792
+          ],
+          "cluster_robust_p": 0.03413132837051359,
+          "base_r_squared": 0.531331361312869,
+          "full_r_squared": 0.5674273641303584,
+          "delta_r_squared": 0.03609600281748948,
+          "condition_number": 73.04048703582673
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.4303435825113182,
+          "patient_cluster_bootstrap_95_ci": [
+            0.23862214729393122,
+            0.5805600360639311
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.37466212446330166,
+          "full_rmse": 0.371894697003949,
+          "rmse_change_full_minus_base": -0.002767427459352656
+        }
+      },
+      "median_abs_pe": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.037496660815438176,
+          "cluster_robust_se": 0.04044951735389689,
+          "cluster_robust_95_ci": [
+            -0.043016089505333116,
+            0.11800941113620947
+          ],
+          "cluster_robust_p": 0.3567505235106579,
+          "base_r_squared": 0.37704653873945426,
+          "full_r_squared": 0.3835083765272178,
+          "delta_r_squared": 0.006461837787763547,
+          "condition_number": 69.04527239058523
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.03219502382750826,
+          "cluster_robust_se": 0.03660675448364108,
+          "cluster_robust_95_ci": [
+            -0.040668898330297826,
+            0.10505894598531434
+          ],
+          "cluster_robust_p": 0.38180679521412625,
+          "base_r_squared": 0.5003671419366522,
+          "full_r_squared": 0.5050541267597686,
+          "delta_r_squared": 0.004686984823116358,
+          "condition_number": 73.04048703582673
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.08625862460680137,
+          "patient_cluster_bootstrap_95_ci": [
+            -0.14567079007375514,
+            0.30351556907884963
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.5240159018517517,
+          "full_rmse": 0.5285096029002078,
+          "rmse_change_full_minus_base": 0.004493701048456034
+        }
+      },
+      "spread_ge_1d": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 39,
+          "odds_ratio_per_10_percentile": 4.940533050729852,
+          "cluster_robust_95_ci": [
+            1.2480717003117212,
+            19.55726327202003
+          ],
+          "cluster_robust_p": 0.023439169260323363
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 39,
+          "odds_ratio_per_10_percentile": 3.8545092776416694,
+          "cluster_robust_95_ci": [
+            0.735450831931311,
+            20.201543225412145
+          ],
+          "cluster_robust_p": 0.10895180348060493
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.7369007803790413,
+          "full_auc": 0.8093645484949833,
+          "auc_change_full_minus_base": 0.07246376811594202,
+          "base_brier": 0.20449136346087693,
+          "full_brier": 0.17918956625803736
+        }
+      },
+      "median_abs_pe_gt_0_5d": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 37,
+          "odds_ratio_per_10_percentile": 0.8629992276823579,
+          "cluster_robust_95_ci": [
+            0.5362058194415624,
+            1.388958567730565
+          ],
+          "cluster_robust_p": 0.5394941185400919
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 37,
+          "odds_ratio_per_10_percentile": 0.8145369613585547,
+          "cluster_robust_95_ci": [
+            0.4646687188537887,
+            1.4278354330711753
+          ],
+          "cluster_robust_p": 0.46910311034111357
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.6976351351351351,
+          "full_auc": 0.6908783783783784,
+          "auc_change_full_minus_base": -0.006756756756756688,
+          "base_brier": 0.22096147976954494,
+          "full_brier": 0.23018154369170796
+        }
+      }
+    },
+    "pilot150_routine_all_six_marginals": {
+      "spread": {
+        "linear": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "estimate_per_10_percentile": 0.13814953904071253,
+          "cluster_robust_se": 0.031436024814815756,
+          "cluster_robust_95_ci": [
+            0.07534886005428823,
+            0.20095021802713683
+          ],
+          "cluster_robust_p": 4.265297547587746e-05,
+          "base_r_squared": 0.3735142489934993,
+          "full_r_squared": 0.48274434354497586,
+          "delta_r_squared": 0.10923009455147659,
+          "condition_number": 85.14754672342843
+        },
+        "flexible_quadratic": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "estimate_per_10_percentile": 0.13625935537737902,
+          "cluster_robust_se": 0.027898252544928448,
+          "cluster_robust_95_ci": [
+            0.0805261889647314,
+            0.19199252179002663
+          ],
+          "cluster_robust_p": 7.266124554561986e-06,
+          "base_r_squared": 0.49830968295112277,
+          "full_r_squared": 0.5941103799370593,
+          "delta_r_squared": 0.09580069698593652,
+          "condition_number": 92.81125692042072
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.4224848104270585,
+          "patient_cluster_bootstrap_95_ci": [
+            0.19286187801896498,
+            0.5865041012282979
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.36704088686617303,
+          "full_rmse": 0.33797834014695527,
+          "rmse_change_full_minus_base": -0.029062546719217763
+        }
+      },
+      "median_abs_pe": {
+        "linear": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "estimate_per_10_percentile": 0.036853251339451644,
+          "cluster_robust_se": 0.04503368756323666,
+          "cluster_robust_95_ci": [
+            -0.053111881748904126,
+            0.1268183844278074
+          ],
+          "cluster_robust_p": 0.4161948176061682,
+          "base_r_squared": 0.31045508227975094,
+          "full_r_squared": 0.317879301318023,
+          "delta_r_squared": 0.007424219038272062,
+          "condition_number": 85.14754672342843
+        },
+        "flexible_quadratic": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "estimate_per_10_percentile": 0.016780151717403744,
+          "cluster_robust_se": 0.0419844095198221,
+          "cluster_robust_95_ci": [
+            -0.06709334819936293,
+            0.10065365163417041
+          ],
+          "cluster_robust_p": 0.6907260903686907,
+          "base_r_squared": 0.3647684418286947,
+          "full_r_squared": 0.3661561032167534,
+          "delta_r_squared": 0.0013876613880586808,
+          "condition_number": 92.81125692042072
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.15313766570223492,
+          "patient_cluster_bootstrap_95_ci": [
+            -0.1297851288788489,
+            0.40714635189427245
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.38797794191929497,
+          "full_rmse": 0.3977568377983414,
+          "rmse_change_full_minus_base": 0.009778895879046456
+        }
+      },
+      "spread_ge_1d": {
+        "linear": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "events": 31,
+          "odds_ratio_per_10_percentile": 6.628173330714228,
+          "cluster_robust_95_ci": [
+            1.0302560728514765,
+            42.642487493810435
+          ],
+          "cluster_robust_p": 0.04654721462836093
+        },
+        "flexible_quadratic": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "events": 31,
+          "odds_ratio_per_10_percentile": 3.722175806390522,
+          "cluster_robust_95_ci": [
+            0.423655377158194,
+            32.70250651983484
+          ],
+          "cluster_robust_p": 0.23140858635700942
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.702037351443124,
+          "full_auc": 0.7928692699490663,
+          "auc_change_full_minus_base": 0.0908319185059423,
+          "base_brier": 0.21980821807758436,
+          "full_brier": 0.1791544676387894
+        }
+      },
+      "median_abs_pe_gt_0_5d": {
+        "linear": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "events": 26,
+          "odds_ratio_per_10_percentile": 0.7487881200349711,
+          "cluster_robust_95_ci": [
+            0.4111268560571327,
+            1.3637728609672493
+          ],
+          "cluster_robust_p": 0.338698145990032
+        },
+        "flexible_quadratic": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "events": 26,
+          "odds_ratio_per_10_percentile": 0.6467221434826923,
+          "cluster_robust_95_ci": [
+            0.33000630558664745,
+            1.2673986035731404
+          ],
+          "cluster_robust_p": 0.2002758641969481
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.592128801431127,
+          "full_auc": 0.5796064400715564,
+          "auc_change_full_minus_base": -0.012522361359570633,
+          "base_brier": 0.24451524861762902,
+          "full_brier": 0.25577292041466304
+        }
+      }
+    },
+    "combined_routine_primary_formula_count_adjusted": {
+      "spread": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.07250233964035938,
+          "cluster_robust_se": 0.02705722699732181,
+          "cluster_robust_95_ci": [
+            0.018646276475295875,
+            0.12635840280542288
+          ],
+          "cluster_robust_p": 0.008967003845655894,
+          "base_r_squared": 0.29550484910733743,
+          "full_r_squared": 0.35517889227340516,
+          "delta_r_squared": 0.059674043166067725,
+          "condition_number": 56.717135400025406
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.07310195274885933,
+          "cluster_robust_se": 0.029074262105166764,
+          "cluster_robust_95_ci": [
+            0.015231081629344292,
+            0.1309728238683744
+          ],
+          "cluster_robust_p": 0.013957865913358201,
+          "base_r_squared": 0.3577920156938308,
+          "full_r_squared": 0.41763901827975713,
+          "delta_r_squared": 0.059847002585926345,
+          "condition_number": 60.57375740217548
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.38914278602315816,
+          "patient_cluster_bootstrap_95_ci": [
+            0.18739589318612074,
+            0.5528886303819545
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.39035519485379505,
+          "full_rmse": 0.3814558855453895,
+          "rmse_change_full_minus_base": -0.008899309308405545
+        }
+      },
+      "median_abs_pe": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.022542921120974682,
+          "cluster_robust_se": 0.03939030498535182,
+          "cluster_robust_95_ci": [
+            -0.055861519718147734,
+            0.1009473619600971
+          ],
+          "cluster_robust_p": 0.5687464153623637,
+          "base_r_squared": 0.1965893851833298,
+          "full_r_squared": 0.20008216536459178,
+          "delta_r_squared": 0.0034927801812619785,
+          "condition_number": 56.717135400025406
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.014531779876315182,
+          "cluster_robust_se": 0.03728154810179963,
+          "cluster_robust_95_ci": [
+            -0.05967528538061653,
+            0.0887388451332469
+          ],
+          "cluster_robust_p": 0.6977445806388403,
+          "base_r_squared": 0.23431896463241375,
+          "full_r_squared": 0.23575079483340944,
+          "delta_r_squared": 0.0014318302009956874,
+          "condition_number": 60.57375740217548
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.10149575027857173,
+          "patient_cluster_bootstrap_95_ci": [
+            -0.11690975238114325,
+            0.30146852618573916
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.5424912544672007,
+          "full_rmse": 0.549133941579357,
+          "rmse_change_full_minus_base": 0.00664268711215632
+        }
+      },
+      "spread_ge_1d": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 39,
+          "odds_ratio_per_10_percentile": 3.1976115566558425,
+          "cluster_robust_95_ci": [
+            1.3041723732312696,
+            7.840006334381878
+          ],
+          "cluster_robust_p": 0.01173766939750175
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 39,
+          "odds_ratio_per_10_percentile": 2.790436303619926,
+          "cluster_robust_95_ci": [
+            1.0187243383004783,
+            7.643416841841813
+          ],
+          "cluster_robust_p": 0.04602578394759495
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.6828316610925307,
+          "full_auc": 0.758082497212932,
+          "auc_change_full_minus_base": 0.07525083612040129,
+          "base_brier": 0.21695808733891858,
+          "full_brier": 0.19558502823852805
+        }
+      },
+      "median_abs_pe_gt_0_5d": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 37,
+          "odds_ratio_per_10_percentile": 0.9643052548660586,
+          "cluster_robust_95_ci": [
+            0.6711416873429473,
+            1.3855265469258977
+          ],
+          "cluster_robust_p": 0.8422910398118245
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 37,
+          "odds_ratio_per_10_percentile": 0.9275287681425638,
+          "cluster_robust_95_ci": [
+            0.6202797646039182,
+            1.3869703073119197
+          ],
+          "cluster_robust_p": 0.7107614855884545
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.6509009009009009,
+          "full_auc": 0.6193693693693694,
+          "auc_change_full_minus_base": -0.03153153153153154,
+          "base_brier": 0.2321168887975874,
+          "full_brier": 0.2420103675440755
+        }
+      }
+    },
+    "complete_nine_formula_routine_primary": {
+      "spread": {
+        "linear": {
+          "n_eyes": 64,
+          "n_patients": 62,
+          "estimate_per_10_percentile": 0.08631801104042364,
+          "cluster_robust_se": 0.028969764225888598,
+          "cluster_robust_95_ci": [
+            0.02838938724259414,
+            0.14424663483825312
+          ],
+          "cluster_robust_p": 0.004139539425714537,
+          "base_r_squared": 0.25327569770893754,
+          "full_r_squared": 0.36065386838524605,
+          "delta_r_squared": 0.1073781706763085,
+          "condition_number": 51.98045454798099
+        },
+        "flexible_quadratic": {
+          "n_eyes": 64,
+          "n_patients": 62,
+          "estimate_per_10_percentile": 0.08765914038799083,
+          "cluster_robust_se": 0.03273458412341101,
+          "cluster_robust_95_ci": [
+            0.02220229392981729,
+            0.15311598684616437
+          ],
+          "cluster_robust_p": 0.009506777431357468,
+          "base_r_squared": 0.2889847364821484,
+          "full_r_squared": 0.39888543129181775,
+          "delta_r_squared": 0.10990069480966935,
+          "condition_number": 53.07745289332333
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.4537916456711223,
+          "patient_cluster_bootstrap_95_ci": [
+            0.22170960636278514,
+            0.6441008506432815
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.38263647538658196,
+          "full_rmse": 0.3646986671760275,
+          "rmse_change_full_minus_base": -0.017937808210554462
+        }
+      },
+      "median_abs_pe": {
+        "linear": {
+          "n_eyes": 64,
+          "n_patients": 62,
+          "estimate_per_10_percentile": -0.013178659305359289,
+          "cluster_robust_se": 0.023170612809697913,
+          "cluster_robust_95_ci": [
+            -0.05951116315841709,
+            0.03315384454769851
+          ],
+          "cluster_robust_p": 0.5716030593221446,
+          "base_r_squared": 0.03392011418797247,
+          "full_r_squared": 0.036982089393932105,
+          "delta_r_squared": 0.003061975205959633,
+          "condition_number": 51.98045454798099
+        },
+        "flexible_quadratic": {
+          "n_eyes": 64,
+          "n_patients": 62,
+          "estimate_per_10_percentile": -0.016130616004794138,
+          "cluster_robust_se": 0.025923407136216284,
+          "cluster_robust_95_ci": [
+            -0.06796767231779832,
+            0.035706440308210054
+          ],
+          "cluster_robust_p": 0.5361022252614315,
+          "base_r_squared": 0.053800706795892106,
+          "full_r_squared": 0.05835324904916106,
+          "delta_r_squared": 0.004552542253268954,
+          "condition_number": 53.07745289332333
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.02015969684858767,
+          "patient_cluster_bootstrap_95_ci": [
+            -0.22061633273279524,
+            0.26644438449297414
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.39336665119441644,
+          "full_rmse": 0.3979599008860156,
+          "rmse_change_full_minus_base": 0.004593249691599188
+        }
+      },
+      "spread_ge_1d": {
+        "linear": {
+          "n_eyes": 64,
+          "n_patients": 62,
+          "events": 30,
+          "odds_ratio_per_10_percentile": 3.7676444480482627,
+          "cluster_robust_95_ci": [
+            0.9892355357955168,
+            14.34961055608818
+          ],
+          "cluster_robust_p": 0.05182454966725634
+        },
+        "flexible_quadratic": {
+          "n_eyes": 64,
+          "n_patients": 62,
+          "events": 30,
+          "odds_ratio_per_10_percentile": 3.592894956360451,
+          "cluster_robust_95_ci": [
+            0.8711049257851176,
+            14.81898883283862
+          ],
+          "cluster_robust_p": 0.07602874483463298
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.6588235294117647,
+          "full_auc": 0.7754901960784314,
+          "auc_change_full_minus_base": 0.1166666666666667,
+          "base_brier": 0.2271665784874641,
+          "full_brier": 0.1962032608281661
+        }
+      },
+      "median_abs_pe_gt_0_5d": {
+        "linear": {
+          "n_eyes": 64,
+          "n_patients": 62,
+          "events": 27,
+          "odds_ratio_per_10_percentile": 0.9643039308558105,
+          "cluster_robust_95_ci": [
+            0.6695048178104653,
+            1.3889102009826229
+          ],
+          "cluster_robust_p": 0.8427643523737957
+        },
+        "flexible_quadratic": {
+          "n_eyes": 64,
+          "n_patients": 62,
+          "events": 27,
+          "odds_ratio_per_10_percentile": 0.9510629973954597,
+          "cluster_robust_95_ci": [
+            0.6375259301918033,
+            1.4187984867418741
+          ],
+          "cluster_robust_p": 0.8027832548120536
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.3963963963963964,
+          "full_auc": 0.3913913913913914,
+          "auc_change_full_minus_base": -0.005005005005005003,
+          "base_brier": 0.26479407862541,
+          "full_brier": 0.27848588764659543
+        }
+      }
+    },
+    "combined_routine_literal_sensitivity": {
+      "spread": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.06723925464262148,
+          "cluster_robust_se": 0.023380004327525482,
+          "cluster_robust_95_ci": [
+            0.020702520113717073,
+            0.1137759891715259
+          ],
+          "cluster_robust_p": 0.005176216105493663,
+          "base_r_squared": 0.4227763158746921,
+          "full_r_squared": 0.4743758697806322,
+          "delta_r_squared": 0.051599553905940065,
+          "condition_number": 56.406840347993835
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.06838337336109984,
+          "cluster_robust_se": 0.02562467194299991,
+          "cluster_robust_95_ci": [
+            0.017378739705077598,
+            0.11938800701712209
+          ],
+          "cluster_robust_p": 0.009238791918818521,
+          "base_r_squared": 0.4368688763018531,
+          "full_r_squared": 0.48909235269331264,
+          "delta_r_squared": 0.05222347639145952,
+          "condition_number": 58.17886295311013
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.3829861762321489,
+          "patient_cluster_bootstrap_95_ci": [
+            0.16076188514332082,
+            0.5642637885815048
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.3527338718802011,
+          "full_rmse": 0.3416756940592936,
+          "rmse_change_full_minus_base": -0.011058177820907511
+        }
+      },
+      "median_abs_pe": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.03123362906920238,
+          "cluster_robust_se": 0.04170785956845312,
+          "cluster_robust_95_ci": [
+            -0.051783788777073805,
+            0.11425104691547856
+          ],
+          "cluster_robust_p": 0.4561614695618004,
+          "base_r_squared": 0.15301153767491205,
+          "full_r_squared": 0.15975238533654312,
+          "delta_r_squared": 0.0067408476616310775,
+          "condition_number": 56.406840347993835
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "estimate_per_10_percentile": 0.03449571297285635,
+          "cluster_robust_se": 0.04382627324473952,
+          "cluster_robust_95_ci": [
+            -0.05273830182073848,
+            0.12172972776645118
+          ],
+          "cluster_robust_p": 0.43357763706925995,
+          "base_r_squared": 0.1565610134348724,
+          "full_r_squared": 0.1646067246048455,
+          "delta_r_squared": 0.008045711169973102,
+          "condition_number": 58.17886295311013
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.08700835038004397,
+          "patient_cluster_bootstrap_95_ci": [
+            -0.14612933022821695,
+            0.31033399830714276
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.5520697363819549,
+          "full_rmse": 0.558506143873587,
+          "rmse_change_full_minus_base": 0.006436407491632101
+        }
+      },
+      "spread_ge_1d": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 39,
+          "odds_ratio_per_10_percentile": 3.4604454536392657,
+          "cluster_robust_95_ci": [
+            1.4155346081807232,
+            8.459477195688489
+          ],
+          "cluster_robust_p": 0.007097486117803353
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 39,
+          "odds_ratio_per_10_percentile": 3.7528385523776304,
+          "cluster_robust_95_ci": [
+            1.272502737511501,
+            11.067793243222424
+          ],
+          "cluster_robust_p": 0.017191296377776825
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.7073578595317725,
+          "full_auc": 0.8004459308807135,
+          "auc_change_full_minus_base": 0.09308807134894093,
+          "base_brier": 0.21155216542370606,
+          "full_brier": 0.18533357313242585
+        }
+      },
+      "median_abs_pe_gt_0_5d": {
+        "linear": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 37,
+          "odds_ratio_per_10_percentile": 0.9840189334902073,
+          "cluster_robust_95_ci": [
+            0.6693848973350969,
+            1.44654184060934
+          ],
+          "cluster_robust_p": 0.9338810730760185
+        },
+        "flexible_quadratic": {
+          "n_eyes": 85,
+          "n_patients": 80,
+          "events": 37,
+          "odds_ratio_per_10_percentile": 1.0278513347564422,
+          "cluster_robust_95_ci": [
+            0.688773978990093,
+            1.533853482545391
+          ],
+          "cluster_robust_p": 0.891702293246439
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.6143018018018018,
+          "full_auc": 0.5945945945945946,
+          "auc_change_full_minus_base": -0.0197072072072072,
+          "base_brier": 0.23776736717323063,
+          "full_brier": 0.24757996221528816
+        }
+      }
+    },
+    "pilot150_routine_literal_sensitivity": {
+      "spread": {
+        "linear": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "estimate_per_10_percentile": 0.09115415969466723,
+          "cluster_robust_se": 0.023295727334296502,
+          "cluster_robust_95_ci": [
+            0.04461559438004384,
+            0.1376927250092906
+          ],
+          "cluster_robust_p": 0.00022347865028140586,
+          "base_r_squared": 0.3835658616282853,
+          "full_r_squared": 0.45060241623811126,
+          "delta_r_squared": 0.06703655460982594,
+          "condition_number": 71.52598961220842
+        },
+        "flexible_quadratic": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "estimate_per_10_percentile": 0.10342146316657241,
+          "cluster_robust_se": 0.025391212401031153,
+          "cluster_robust_95_ci": [
+            0.05269668519395333,
+            0.1541462411391915
+          ],
+          "cluster_robust_p": 0.0001301840624842379,
+          "base_r_squared": 0.3862819999409851,
+          "full_r_squared": 0.46549875383880246,
+          "delta_r_squared": 0.07921675389781735,
+          "condition_number": 74.07833737434706
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.41615778687402905,
+          "patient_cluster_bootstrap_95_ci": [
+            0.1904343677927232,
+            0.5951165829572462
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.33591302818330615,
+          "full_rmse": 0.31935176867006504,
+          "rmse_change_full_minus_base": -0.01656125951324111
+        }
+      },
+      "median_abs_pe": {
+        "linear": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "estimate_per_10_percentile": 0.0036379287277600245,
+          "cluster_robust_se": 0.03649108801530132,
+          "cluster_robust_95_ci": [
+            -0.0692613999187244,
+            0.07653725737424444
+          ],
+          "cluster_robust_p": 0.920899189976753,
+          "base_r_squared": 0.16095891280630625,
+          "full_r_squared": 0.16106089463690376,
+          "delta_r_squared": 0.00010198183059750843,
+          "condition_number": 71.52598961220842
+        },
+        "flexible_quadratic": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "estimate_per_10_percentile": 0.00606077731260854,
+          "cluster_robust_se": 0.040189719746579096,
+          "cluster_robust_95_ci": [
+            -0.07422741762384988,
+            0.08634897224906696
+          ],
+          "cluster_robust_p": 0.8806045070147422,
+          "base_r_squared": 0.172508549251145,
+          "full_r_squared": 0.17276839048534842,
+          "delta_r_squared": 0.0002598412342034173,
+          "condition_number": 74.07833737434706
+        },
+        "partial_rank": {
+          "partial_spearman_rho": 0.12305322493166541,
+          "patient_cluster_bootstrap_95_ci": [
+            -0.14560200110924307,
+            0.38117552415949085
+          ]
+        },
+        "leave_one_patient_out": {
+          "base_rmse": 0.4071731788052215,
+          "full_rmse": 0.4139800059988623,
+          "rmse_change_full_minus_base": 0.006806827193640785
+        }
+      },
+      "spread_ge_1d": {
+        "linear": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "events": 31,
+          "odds_ratio_per_10_percentile": 3.785430795923753,
+          "cluster_robust_95_ci": [
+            1.281880994317621,
+            11.178484098171607
+          ],
+          "cluster_robust_p": 0.01677950393215586
+        },
+        "flexible_quadratic": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "events": 31,
+          "odds_ratio_per_10_percentile": 3.9789736729955534,
+          "cluster_robust_95_ci": [
+            1.0934849286450472,
+            14.478692001735835
+          ],
+          "cluster_robust_p": 0.036514333938061264
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.6629881154499151,
+          "full_auc": 0.7784380305602716,
+          "auc_change_full_minus_base": 0.11544991511035652,
+          "base_brier": 0.2227312729713428,
+          "full_brier": 0.19332879987668733
+        }
+      },
+      "median_abs_pe_gt_0_5d": {
+        "linear": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "events": 26,
+          "odds_ratio_per_10_percentile": 0.895077411918275,
+          "cluster_robust_95_ci": [
+            0.5296434166423563,
+            1.5126470907639091
+          ],
+          "cluster_robust_p": 0.6744220082044574
+        },
+        "flexible_quadratic": {
+          "n_eyes": 69,
+          "n_patients": 65,
+          "events": 26,
+          "odds_ratio_per_10_percentile": 0.9872143612821205,
+          "cluster_robust_95_ci": [
+            0.48340254538723276,
+            2.0161089436154325
+          ],
+          "cluster_robust_p": 0.9713926382980901
+        },
+        "leave_one_patient_out": {
+          "base_auc": 0.5205724508050089,
+          "full_auc": 0.4883720930232558,
+          "auc_change_full_minus_base": -0.03220035778175312,
+          "base_brier": 0.2384000337393859,
+          "full_brier": 0.24959037833845255
+        }
+      }
+    }
+  }
+}

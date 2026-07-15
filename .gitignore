@@ -9,6 +9,13 @@ __pycache__/
 *.py[cod]
 .venv/
 .env*.local
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Local Codex/document-rendering scratch files
+.codex_fmt/
 
 # Local logs
 IOLMasterParser_error.txt
@@ -35,7 +42,13 @@ our_data_summary.json
 *.doc
 *.docx
 *.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
 outputs/
+artifacts/
+analysis_outputs/
 reports/figures/
 presentations/
 slides/

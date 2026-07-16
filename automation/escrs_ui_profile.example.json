@@ -1,0 +1,88 @@
+{
+  "verified": false,
+  "url": "https://iolcalculator.escrs.org/",
+  "terms_accept_names": [
+    "Accept",
+    "I Agree",
+    "Agree"
+  ],
+  "static_values": {
+    "surgeon": "Research",
+    "patient_name": "Anonymized"
+  },
+  "field_order": [
+    "surgeon",
+    "patient_name",
+    "patient_id",
+    "gender",
+    "manufacturer",
+    "iol_model",
+    "k_index",
+    "target_refraction",
+    "axial_length",
+    "k1",
+    "k2",
+    "acd",
+    "lens_thickness",
+    "cct",
+    "wtw"
+  ],
+  "fields": {
+    "surgeon": {
+      "labels": ["Surgeon", "Surgeon name"]
+    },
+    "patient_name": {
+      "labels": ["Patient Name", "Patient name"]
+    },
+    "patient_id": {
+      "labels": ["Patient Identifier", "Patient ID"]
+    },
+    "gender": {
+      "labels": ["Gender", "Sex"]
+    },
+    "manufacturer": {
+      "labels": ["Manufacturer", "IOL Manufacturer"]
+    },
+    "iol_model": {
+      "labels": ["IOL", "IOL Model", "Lens"]
+    },
+    "k_index": {
+      "labels": ["K Index", "Keratometric Index"]
+    },
+    "target_refraction": {
+      "labels": ["Target Refraction", "Target Rx"]
+    },
+    "axial_length": {
+      "labels": ["Axial Length", "AL"]
+    },
+    "k1": {
+      "labels": ["K1", "K1 (Flat)"]
+    },
+    "k2": {
+      "labels": ["K2", "K2 (Steep)"]
+    },
+    "acd": {
+      "labels": ["Anterior Chamber Depth", "Optical ACD", "ACD"]
+    },
+    "lens_thickness": {
+      "labels": ["Lens Thickness", "LT"]
+    },
+    "cct": {
+      "labels": ["Central Corneal Thickness", "CCT"]
+    },
+    "wtw": {
+      "labels": ["White-to-White", "Corneal Diameter", "WTW", "CD"]
+    }
+  },
+  "calculate_button_names": [
+    "Calculate",
+    "Compute"
+  ],
+  "reset_button_names": [
+    "New Calculation",
+    "Reset",
+    "Clear"
+  ],
+  "minimum_result_formulas": 3,
+  "result_pair_pattern": "(?P<power>[+-]?\\d{1,2}(?:[.,]\\d{1,2})?)\\s*(?:D)?\\s+(?P<refraction>[+-]?\\d{1,2}(?:[.,]\\d{1,3})?)"
+}

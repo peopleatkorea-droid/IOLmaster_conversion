@@ -309,6 +309,53 @@ def solve_ols(design, outcome):
     return beta, x @ beta
 
 
+def age_sex_residual(records, visit, outcome_name):
+    """Residualize one biometric measure on the visit-specific age and sex."""
+
+    age_key = "age" if visit == "baseline" else "follow_age"
+    age = matrix(records, age_key)
+    sex = matrix(records, "female")
+    values = matrix(records, f"{outcome_name}_{visit}")
+    spline = RestrictedCubicSpline().fit(age)
+    design = np.column_stack([spline.transform(age), sex])
+    _, fitted = solve_ols(design, values)
+    return values - fitted
+
+
+def continuous_geometry_associations(records):
+    """Match the clinical-cohort partial-Spearman analysis at both school visits."""
+
+    result = {}
+    for visit in ("baseline", "follow"):
+        al_residual = age_sex_residual(records, visit, "AL")
+        result[visit] = {}
+        for outcome_name in ("K", "ACD"):
+            outcome_residual = age_sex_residual(
+                records, visit, outcome_name
+            )
+            association = stats.spearmanr(al_residual, outcome_residual)
+            result[visit][outcome_name] = {
+                "rho": float(association.statistic),
+                "p_value": float(association.pvalue),
+            }
+    return result
+
+
+def threshold_24_summary(records):
+    baseline_al = matrix(records, "AL_baseline")
+    at_or_above = baseline_al >= 24.0
+    return {
+        "n": len(records),
+        "n_at_or_above_24": int(np.sum(at_or_above)),
+        "percent_at_or_above_24": float(np.mean(at_or_above) * 100.0),
+        "n_between_23_5_and_24_5": int(
+            np.sum((baseline_al >= 23.5) & (baseline_al <= 24.5))
+        ),
+        "minimum": float(np.min(baseline_al)),
+        "maximum": float(np.max(baseline_al)),
+    }
+
+
 def fit_ols(design, outcome, names):
     x = add_intercept(design)
     y = np.asarray(outcome, dtype=float)
@@ -1175,6 +1222,12 @@ def main():
             "AL_rate_median": float(np.median(matrix(name_matched, "AL_rate"))),
             "AL_rate_mean": float(np.mean(matrix(name_matched, "AL_rate"))),
         },
+        "primary_continuous_geometry": continuous_geometry_associations(
+            obvious_outliers_removed
+        ),
+        "primary_threshold_24_summary": threshold_24_summary(
+            obvious_outliers_removed
+        ),
         "robust_al_sensitivity": robust_al_sensitivity(
             physiologic,
             args.bootstrap_replicates,

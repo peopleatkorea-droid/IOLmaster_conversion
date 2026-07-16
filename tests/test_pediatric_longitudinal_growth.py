@@ -3,9 +3,11 @@ import unittest
 import numpy as np
 
 from modeling.analyze_pediatric_longitudinal_growth import (
+    continuous_geometry_associations,
     fit_ols,
     nested_comparison,
     solve_ols,
+    threshold_24_summary,
     winsorize,
 )
 
@@ -56,6 +58,42 @@ class PediatricLongitudinalGrowthTests(unittest.TestCase):
         self.assertEqual(clipped.max(), 99.0)
         self.assertEqual(limits["lower_value"], 1.0)
         self.assertEqual(limits["upper_value"], 99.0)
+
+    def test_continuous_geometry_associations_preserve_expected_directions(self):
+        rng = np.random.default_rng(20260715)
+        records = []
+        for index, age in enumerate(np.linspace(8.5, 11.5, 160)):
+            female = float(index % 2)
+            latent = rng.normal()
+            records.append(
+                {
+                    "age": age,
+                    "follow_age": age + 2.0,
+                    "female": female,
+                    "AL_baseline": 23.5 + 0.2 * age + 0.1 * female + latent,
+                    "K_baseline": 44.0 - 0.6 * latent + rng.normal(scale=0.1),
+                    "ACD_baseline": 3.4 + 0.2 * latent + rng.normal(scale=0.04),
+                    "AL_follow": 24.0 + 0.2 * age + 0.1 * female + latent,
+                    "K_follow": 43.9 - 0.5 * latent + rng.normal(scale=0.1),
+                    "ACD_follow": 3.5 + 0.2 * latent + rng.normal(scale=0.04),
+                }
+            )
+        associations = continuous_geometry_associations(records)
+        self.assertLess(associations["baseline"]["K"]["rho"], -0.8)
+        self.assertGreater(associations["baseline"]["ACD"]["rho"], 0.8)
+        self.assertLess(associations["follow"]["K"]["rho"], -0.8)
+        self.assertGreater(associations["follow"]["ACD"]["rho"], 0.8)
+
+    def test_threshold_24_summary_counts_boundary_as_exposed(self):
+        records = [
+            {"AL_baseline": 23.0},
+            {"AL_baseline": 24.0},
+            {"AL_baseline": 24.5},
+        ]
+        summary = threshold_24_summary(records)
+        self.assertEqual(summary["n_at_or_above_24"], 2)
+        self.assertAlmostEqual(summary["percent_at_or_above_24"], 200.0 / 3.0)
+        self.assertEqual(summary["n_between_23_5_and_24_5"], 2)
 
 
 if __name__ == "__main__":

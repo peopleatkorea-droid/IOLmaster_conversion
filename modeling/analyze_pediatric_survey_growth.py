@@ -62,10 +62,10 @@ except ModuleNotFoundError:
 
 ACTIVITY_CODE_LABELS = {
     1: "<=1 hour/day",
-    2: "<=2 hours/day",
-    3: "<=3 hours/day",
-    4: "<=4 hours/day",
-    5: ">=5 hours/day",
+    2: ">1 to 2 hours/day",
+    3: ">2 to 3 hours/day",
+    4: ">3 to 4 hours/day",
+    5: ">4 hours/day",
 }
 BASELINE_ACTIVITY_COLUMNS = {
     "study_category": "studyhour",

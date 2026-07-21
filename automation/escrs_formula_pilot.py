@@ -293,19 +293,339 @@ def locator_manifest(page):
             role: element.getAttribute('role'),
             ariaLabel: element.getAttribute('aria-label'),
             placeholder: element.getAttribute('placeholder'),
+            className: element.className || null,
+            readOnly: !!element.readOnly,
+            disabled: !!element.disabled,
             text: (element.innerText || element.value || '').trim().slice(0, 200),
+            inputControlText: (
+                element.closest('.mud-input-control')?.innerText || ''
+            ).trim().slice(0, 500),
+            ancestors: (() => {
+                const result = [];
+                let current = element.parentElement;
+                for (let depth = 0; current && depth < 5; depth += 1) {
+                    result.push({
+                        tag: current.tagName,
+                        className: current.className || null,
+                        text: (current.innerText || '').trim().slice(0, 500)
+                    });
+                    current = current.parentElement;
+                }
+                return result;
+            })(),
+            outerHTML: element.outerHTML.slice(0, 1000),
             visible: !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length)
         }))"""
     )
 
 
-def accept_visible_terms(page, profile) -> None:
-    for label in profile.get("terms_accept_names", ("Accept", "I Agree", "Agree")):
-        locator = page.get_by_role("button", name=re.compile(re.escape(label), re.I))
-        if locator.count() and locator.first.is_visible():
-            locator.first.click()
-            page.wait_for_timeout(1000)
+def visible_text_input(page, index: int):
+    locator = page.locator('input[type="text"]:visible')
+    if index < 0 or index >= locator.count():
+        raise RuntimeError(
+            f"Visible text input index {index} is unavailable; "
+            f"the page currently has {locator.count()} visible text inputs."
+        )
+    return locator.nth(index)
+
+
+def input_control_context(control) -> str:
+    return control.evaluate(
+        """element => (
+            element.closest('.mud-input-control')?.innerText
+            || element.parentElement?.innerText
+            || ''
+        ).trim()"""
+    )
+
+
+def normalized_ui_text(value: object) -> str:
+    return re.sub(r"\s+", " ", str(value or "")).strip()
+
+
+def visible_text_input_by_context(
+    page,
+    patterns: Iterable[str],
+    occurrence: int = 0,
+):
+    matches = []
+    locator = page.locator('input[type="text"]:visible')
+    for index in range(locator.count()):
+        candidate = locator.nth(index)
+        context_text = normalized_ui_text(input_control_context(candidate))
+        if any(re.search(pattern, context_text, re.I) for pattern in patterns):
+            matches.append(candidate)
+    if occurrence < 0 or occurrence >= len(matches):
+        raise RuntimeError(
+            "Visible text input was not found for context patterns "
+            f"{list(patterns)!r} at occurrence {occurrence}; "
+            f"{len(matches)} matching controls were found."
+        )
+    return matches[occurrence]
+
+
+def control_snapshot(page):
+    result = []
+    locator = page.locator('input[type="text"]:visible')
+    for index in range(locator.count()):
+        control = locator.nth(index)
+        result.append(
+            {
+                "visible_text_input_index": index,
+                "context": normalized_ui_text(input_control_context(control)),
+                "value": control.input_value(),
+                "read_only": control.is_editable() is False,
+                "disabled": control.is_disabled(),
+            }
+        )
+    return result
+
+
+def visible_option_locators(page):
+    selectors = (
+        '[role="option"]:visible',
+        ".mud-list-item:visible",
+        ".mud-popover-open .mud-list-item:visible",
+    )
+    result = []
+    seen = set()
+    for selector in selectors:
+        locator = page.locator(selector)
+        for index in range(locator.count()):
+            candidate = locator.nth(index)
+            try:
+                text = re.sub(r"\s+", " ", candidate.inner_text()).strip()
+            except Exception:
+                continue
+            if not text:
+                continue
+            if text not in seen:
+                seen.add(text)
+                result.append((candidate, text))
+    return result
+
+
+def choose_visible_option(page, patterns: Iterable[str]):
+    candidates = visible_option_locators(page)
+    for pattern in patterns:
+        regex = re.compile(pattern, re.I)
+        for candidate, text in candidates:
+            if regex.fullmatch(text):
+                candidate.click()
+                return text
+    for pattern in patterns:
+        regex = re.compile(pattern, re.I)
+        for candidate, text in candidates:
+            if regex.search(text):
+                candidate.click()
+                return text
+    return None
+
+
+def probe_dropdowns(page, profile, output_dir: Path, save_progress):
+    results = []
+    for probe in profile.get("ui_probes", ()):
+        name = probe["name"]
+        result = {
+            "name": name,
+            "text_input_index": probe["text_input_index"],
+            "context_patterns": probe.get("context_patterns", ()),
+            "search_text": probe.get("search_text"),
+            "options": [],
+            "selected": None,
+            "control_value_after_probe": None,
+            "controls_after_probe": [],
+            "error": None,
+        }
+        if probe.get("requires_successful_probe"):
+            prerequisite = next(
+                (
+                    item
+                    for item in results
+                    if item["name"] == probe["requires_successful_probe"]
+                ),
+                None,
+            )
+            if prerequisite is None or prerequisite.get("error"):
+                result["error"] = (
+                    "Skipped because prerequisite probe did not succeed: "
+                    + probe["requires_successful_probe"]
+                )
+                results.append(result)
+                save_progress(results)
+                continue
+        try:
+            if probe.get("context_patterns"):
+                control = visible_text_input_by_context(
+                    page,
+                    probe["context_patterns"],
+                    int(probe.get("context_occurrence", 0)),
+                )
+            else:
+                control = visible_text_input(
+                    page,
+                    int(probe["text_input_index"]),
+                )
+            if control.is_disabled():
+                raise RuntimeError(f"Control is disabled for probe: {name}")
+            control.click()
+            page.wait_for_timeout(700)
+            search_text = probe.get("search_text")
+            if search_text:
+                try:
+                    control.fill(str(search_text))
+                except Exception:
+                    page.keyboard.type(str(search_text), delay=80)
+                page.wait_for_timeout(1000)
+            result["options"] = [
+                text for _, text in visible_option_locators(page)
+            ]
+            page.screenshot(
+                path=str(output_dir / f"probe_{name}_options.png"),
+                full_page=True,
+            )
+            if probe.get("select_option_patterns"):
+                result["selected"] = choose_visible_option(
+                    page,
+                    probe["select_option_patterns"],
+                )
+                if result["selected"] is None:
+                    raise RuntimeError(
+                        f"No configured option matched for {name}. "
+                        f"Visible options: {result['options'][:30]}"
+                    )
+                page.wait_for_timeout(1000)
+            else:
+                page.keyboard.press("Escape")
+                page.wait_for_timeout(300)
+            try:
+                if probe.get("context_patterns"):
+                    current_control = visible_text_input_by_context(
+                        page,
+                        probe["context_patterns"],
+                        int(probe.get("context_occurrence", 0)),
+                    )
+                else:
+                    current_control = visible_text_input(
+                        page,
+                        int(probe["text_input_index"]),
+                    )
+                result["control_value_after_probe"] = current_control.input_value()
+            except Exception:
+                result["control_value_after_probe"] = None
+            result["controls_after_probe"] = control_snapshot(page)
+        except Exception as exc:
+            result["error"] = str(exc)
+            try:
+                page.keyboard.press("Escape")
+                page.wait_for_timeout(300)
+            except Exception:
+                pass
+        finally:
+            page.screenshot(
+                path=str(output_dir / f"probe_{name}.png"),
+                full_page=True,
+            )
+            results.append(result)
+            save_progress(results)
+    return results
+
+
+def calculator_form_is_ready(page, profile) -> bool:
+    surgeon = profile.get("fields", {}).get("surgeon", {})
+    patterns = surgeon.get("context_patterns", (r"^Surgeon$",))
+    try:
+        visible_text_input_by_context(page, patterns, 0)
+        return True
+    except Exception:
+        return False
+
+
+def interactive_control_text(control) -> str:
+    return normalized_ui_text(
+        control.evaluate(
+            """element => (
+                element.innerText
+                || element.value
+                || element.getAttribute('aria-label')
+                || element.getAttribute('title')
+                || ''
+            )"""
+        )
+    )
+
+
+def click_visible_terms_control(page, profile) -> str | None:
+    labels = [
+        normalized_ui_text(label)
+        for label in profile.get(
+            "terms_accept_names",
+            ("I Agree", "Accept", "Agree"),
+        )
+    ]
+    selectors = (
+        "button:visible",
+        'input[type="button"]:visible',
+        'input[type="submit"]:visible',
+        '[role="button"]:visible',
+        "a:visible",
+    )
+    for frame in page.frames:
+        candidates = []
+        seen = set()
+        for selector in selectors:
+            locator = frame.locator(selector)
+            for index in range(locator.count()):
+                candidate = locator.nth(index)
+                try:
+                    text = interactive_control_text(candidate)
+                except Exception:
+                    continue
+                if not text or text in seen:
+                    continue
+                seen.add(text)
+                candidates.append((candidate, text))
+        for label in labels:
+            for candidate, text in candidates:
+                if text.casefold() == label.casefold():
+                    candidate.click(timeout=3000)
+                    return text
+        for label in labels:
+            for candidate, text in candidates:
+                if label.casefold() in text.casefold():
+                    candidate.click(timeout=3000)
+                    return text
+    return None
+
+
+def ensure_calculator_ready(page, profile, timeout_seconds: float) -> None:
+    deadline = time.time() + timeout_seconds
+    clicked_labels = []
+    while time.time() < deadline:
+        clicked = click_visible_terms_control(page, profile)
+        if clicked:
+            clicked_labels.append(clicked)
+            page.wait_for_timeout(2000)
+            continue
+        if calculator_form_is_ready(page, profile):
             return
+        page.wait_for_timeout(500)
+    body_excerpt = ""
+    try:
+        body_excerpt = normalized_ui_text(page.locator("body").inner_text())[:1000]
+    except Exception:
+        pass
+    raise RuntimeError(
+        "The ESCRS calculator form did not become ready after "
+        f"{timeout_seconds:.0f}s. Consent controls clicked: {clicked_labels!r}. "
+        f"Visible page text: {body_excerpt!r}"
+    )
+
+
+def accept_visible_terms(page, profile) -> None:
+    """Backward-compatible one-shot consent helper used by inspect-ui."""
+    click_visible_terms_control(page, profile)
+    page.wait_for_timeout(1500)
 
 
 def inspect_ui(args) -> int:
@@ -323,8 +643,11 @@ def inspect_ui(args) -> int:
         page = browser.new_page()
         page.goto(profile.get("url", DEFAULT_URL), wait_until="domcontentloaded")
         page.wait_for_timeout(args.settle_seconds * 1000)
-        accept_visible_terms(page, profile)
-        page.wait_for_timeout(2000)
+        ensure_calculator_ready(
+            page,
+            profile,
+            args.consent_wait_seconds,
+        )
         manifest = {
             "captured_at": datetime.now().astimezone().isoformat(),
             "url": page.url,
@@ -332,6 +655,18 @@ def inspect_ui(args) -> int:
             "controls": locator_manifest(page),
             "body_text_excerpt": page.locator("body").inner_text()[:20000],
         }
+        write_json(output_dir / "ui_manifest.json", manifest)
+        if args.probe_lens_options:
+            def save_probe_progress(results):
+                manifest["dropdown_probes"] = list(results)
+                write_json(output_dir / "ui_manifest.json", manifest)
+
+            manifest["dropdown_probes"] = probe_dropdowns(
+                page,
+                profile,
+                output_dir,
+                save_probe_progress,
+            )
         write_json(output_dir / "ui_manifest.json", manifest)
         page.screenshot(path=str(output_dir / "ui_manifest.png"), full_page=True)
         print(f"Saved UI manifest under {output_dir}")
@@ -352,6 +687,23 @@ def _visible_first(locator):
 
 def find_control(page, field_name: str, profile):
     field = profile["fields"][field_name]
+    if field.get("context_patterns"):
+        return visible_text_input_by_context(
+            page,
+            field["context_patterns"],
+            int(field.get("context_occurrence", 0)),
+        )
+    if field.get("text_input_index") is not None:
+        locator = visible_text_input(page, int(field["text_input_index"]))
+        context_text = input_control_context(locator)
+        patterns = field.get("context_patterns", ())
+        if patterns and not any(
+            re.search(pattern, context_text, re.I) for pattern in patterns
+        ):
+            raise RuntimeError(
+                f"Control context mismatch for {field_name}: {context_text!r}"
+            )
+        return locator
     if field.get("css"):
         locator = _visible_first(page.locator(field["css"]))
         if locator is not None:
@@ -372,11 +724,35 @@ def find_control(page, field_name: str, profile):
 
 
 def set_control(page, field_name: str, value, profile) -> None:
+    field = profile["fields"][field_name]
     control = find_control(page, field_name, profile)
     tag = control.evaluate("element => element.tagName.toLowerCase()")
     role = control.get_attribute("role") or ""
     input_type = (control.get_attribute("type") or "").lower()
     text = str(value)
+    if field.get("action") == "mud_dropdown":
+        control.click()
+        page.wait_for_timeout(400)
+        search_text = field.get("search_text")
+        if search_text:
+            try:
+                control.fill(str(search_text))
+            except Exception:
+                pass
+            page.wait_for_timeout(700)
+        aliases = field.get("option_patterns_by_value", {}).get(text, ())
+        patterns = list(aliases) + list(field.get("option_patterns", ()))
+        if not patterns:
+            patterns = [rf"^{re.escape(text)}$"]
+        selected = choose_visible_option(page, patterns)
+        if selected is None:
+            visible = [option_text for _, option_text in visible_option_locators(page)]
+            raise RuntimeError(
+                f"Option not found for {field_name}: {text}. "
+                f"Visible options: {visible[:20]}"
+            )
+        page.wait_for_timeout(1000)
+        return
     if tag == "select":
         try:
             control.select_option(label=text)
@@ -398,6 +774,37 @@ def set_control(page, field_name: str, value, profile) -> None:
         option.click()
         return
     control.fill(text)
+
+
+def validate_page_profile(page, profile) -> None:
+    controls = []
+    for field_name in profile["field_order"]:
+        control = find_control(page, field_name, profile)
+        signature = control.evaluate(
+            "element => `${element.tagName}|${element.type}|${element.id}`"
+        )
+        if signature in controls:
+            raise RuntimeError(
+                f"UI profile maps more than one field to the same control: {field_name}"
+            )
+        controls.append(signature)
+    required_checked = int(profile.get("required_checked_checkbox_count", 0))
+    if required_checked:
+        checkboxes = page.locator('input[type="checkbox"]:visible')
+        if checkboxes.count() < required_checked:
+            raise RuntimeError(
+                "The expected formula checkboxes are not present on the page."
+            )
+        unchecked = [
+            index
+            for index in range(required_checked)
+            if not checkboxes.nth(index).is_checked()
+        ]
+        if unchecked:
+            raise RuntimeError(
+                "One or more required formula calculators are unchecked: "
+                + ", ".join(str(index) for index in unchecked)
+            )
 
 
 def click_named_button(page, names: Iterable[str]):
@@ -432,6 +839,110 @@ def fill_case(page, case: Mapping[str, object], profile) -> None:
     }
     for field_name in profile["field_order"]:
         set_control(page, field_name, values[field_name], profile)
+
+
+def observed_iol_constants(page, expected):
+    controls = page.locator('input[type="text"]')
+    observed = {}
+    contexts = []
+    for index in range(controls.count()):
+        control = controls.nth(index)
+        context = normalized_ui_text(input_control_context(control))
+        try:
+            value = control.input_value().strip()
+        except Exception:
+            continue
+        if context or value:
+            contexts.append({"context": context, "value": value})
+        for label in expected:
+            if context.casefold() == normalized_ui_text(label).casefold():
+                observed[label] = value
+    return observed, contexts
+
+
+def validate_iol_constants(page, profile, timeout_seconds: float = 15.0) -> None:
+    expected = profile.get("expected_iol_constants", {})
+    deadline = time.time() + timeout_seconds
+    latest_observed = {}
+    latest_contexts = []
+    while time.time() < deadline:
+        latest_observed, latest_contexts = observed_iol_constants(page, expected)
+        mismatches = {}
+        for label, expected_value in expected.items():
+            actual = latest_observed.get(label)
+            actual_number = finite_float(actual)
+            expected_number = finite_float(expected_value)
+            if (
+                actual_number is None
+                or expected_number is None
+                or abs(actual_number - expected_number) > 0.001
+            ):
+                mismatches[label] = {
+                    "expected": str(expected_value),
+                    "observed": actual,
+                }
+        if not mismatches:
+            selected_iols = [
+                item["value"]
+                for item in latest_contexts
+                if item["context"].casefold() == "select iol"
+                and item["value"]
+            ]
+            if "ZCB00" not in selected_iols or "ZCB00V" in selected_iols:
+                raise RuntimeError(
+                    f"Unexpected selected IOL values: {selected_iols!r}"
+                )
+            return
+        page.wait_for_timeout(500)
+    available = [
+        item
+        for item in latest_contexts
+        if item["context"]
+        and (
+            "constant" in item["context"].casefold()
+            or "pacd" in item["context"].casefold()
+            or item["context"].casefold() == "select iol"
+        )
+    ]
+    raise RuntimeError(
+        "ZCB00 constants did not reach the verified values within "
+        f"{timeout_seconds:.0f}s. Observed: {latest_observed!r}. "
+        f"Relevant controls: {available!r}"
+    )
+
+
+def save_error_snapshot(
+    page,
+    snapshot_dir: Path,
+    public_id: str,
+    reason: str,
+    response_statuses: Iterable[int],
+) -> None:
+    base = snapshot_dir / f"{public_id}_error"
+    try:
+        page.screenshot(path=str(base.with_suffix(".png")), full_page=True)
+    except Exception:
+        pass
+    try:
+        base.with_suffix(".txt").write_text(
+            page.locator("body").inner_text(),
+            encoding="utf-8",
+        )
+    except Exception:
+        pass
+    try:
+        write_json(
+            base.with_suffix(".json"),
+            {
+                "captured_at": datetime.now().astimezone().isoformat(),
+                "url": page.url,
+                "reason": reason,
+                "response_statuses": list(response_statuses),
+                "controls": control_snapshot(page),
+            },
+        )
+    except Exception:
+        pass
 
 
 def split_formula_segments(body_text: str):
@@ -778,7 +1289,23 @@ def run_live(args) -> int:
         page.on("response", lambda response: response_statuses.append(response.status))
         page.goto(profile.get("url", DEFAULT_URL), wait_until="domcontentloaded")
         page.wait_for_timeout(args.settle_seconds * 1000)
-        accept_visible_terms(page, profile)
+        try:
+            ensure_calculator_ready(
+                page,
+                profile,
+                args.consent_wait_seconds,
+            )
+            validate_page_profile(page, profile)
+        except Exception as exc:
+            save_error_snapshot(
+                page,
+                snapshot_dir,
+                cases[0]["case"]["public_id"] + "_startup",
+                str(exc),
+                response_statuses,
+            )
+            browser.close()
+            raise
 
         for item in cases:
             case = item["case"]
@@ -797,8 +1324,14 @@ def run_live(args) -> int:
                             wait_until="domcontentloaded",
                         )
                         page.wait_for_timeout(args.settle_seconds * 1000)
-                        accept_visible_terms(page, profile)
+                        ensure_calculator_ready(
+                            page,
+                            profile,
+                            args.consent_wait_seconds,
+                        )
+                        validate_page_profile(page, profile)
                 fill_case(page, case, profile)
+                validate_iol_constants(page, profile)
                 click_named_button(page, profile["calculate_button_names"])
                 limiter.record_request()
                 body_text, formula_results = wait_for_formula_results(
@@ -854,6 +1387,13 @@ def run_live(args) -> int:
                         "Unexpected partial result; stopped for selector review."
                     )
             except Exception as exc:
+                save_error_snapshot(
+                    page,
+                    snapshot_dir,
+                    case["public_id"],
+                    str(exc),
+                    response_statuses,
+                )
                 if not checkpoint_written:
                     append_jsonl(
                         checkpoint_path,
@@ -909,8 +1449,17 @@ def build_parser():
     )
     inspect.add_argument("--browser-channel", default="msedge")
     inspect.add_argument("--settle-seconds", type=int, default=8)
+    inspect.add_argument("--consent-wait-seconds", type=float, default=45.0)
     inspect.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR / "ui_inspection"))
     inspect.add_argument("--keep-open", action="store_true")
+    inspect.add_argument(
+        "--probe-lens-options",
+        action="store_true",
+        help=(
+            "Open Gender/Manufacturer/IOL dropdowns and save their public option "
+            "texts without entering patient or biometry data."
+        ),
+    )
     inspect.set_defaults(func=inspect_ui)
 
     live = subparsers.add_parser(
@@ -934,6 +1483,7 @@ def build_parser():
     live.add_argument("--batch-size", type=int, default=25)
     live.add_argument("--batch-break-seconds", type=float, default=600.0)
     live.add_argument("--settle-seconds", type=int, default=8)
+    live.add_argument("--consent-wait-seconds", type=float, default=45.0)
     live.add_argument("--result-wait-seconds", type=int, default=90)
     live.add_argument("--slow-mo", type=int, default=150)
     live.add_argument("--allow-unverified-history", action="store_true")

@@ -6,7 +6,7 @@ from pathlib import Path
 
 from openpyxl import Workbook, load_workbook
 
-from automation.escrs_formula_pilot import export_results
+from automation.escrs_formula_pilot import export_results, normalized_ui_text
 from automation.escrs_pilot_core import (
     FormulaCandidate,
     assert_anonymized_payload,
@@ -23,6 +23,12 @@ from automation.escrs_pilot_core import (
 
 
 class EsCRSFormulaPilotTests(unittest.TestCase):
+    def test_ui_text_normalization_handles_dynamic_line_breaks(self):
+        self.assertEqual(
+            normalized_ui_text("  Barrett\n\nA-Constant  "),
+            "Barrett A-Constant",
+        )
+
     def test_radius_conversion_and_cct_units(self):
         self.assertAlmostEqual(radius_mm_to_diopters(7.5), 45.0)
         self.assertEqual(normalize_cct_um(0.55), 550.0)
@@ -69,7 +75,7 @@ class EsCRSFormulaPilotTests(unittest.TestCase):
         self.assertNotIn("Sensitive", serialized)
         self.assertNotIn("1970-01-01", serialized)
         self.assertNotIn("source_row", payload)
-        self.assertEqual(payload["calculator_slot"], "right")
+        self.assertEqual(payload["calculator_slot"], "OD")
         assert_anonymized_payload(payload)
 
     def test_payload_rejects_identifier_fields(self):

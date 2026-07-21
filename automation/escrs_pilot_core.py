@@ -61,9 +61,9 @@ class PreparedCase:
     wtw_mm: float
     target_refraction_d: float = TARGET_REFRACTION_D
     k_index: float = K_INDEX
-    manufacturer: str = "Johnson & Johnson Vision"
-    iol_model: str = "TECNIS 1-Piece ZCB00"
-    calculator_slot: str = "right"
+    manufacturer: str = "Johnson and Johnson Vision"
+    iol_model: str = "ZCB00"
+    calculator_slot: str = "OD"
 
     def browser_payload(self) -> dict[str, object]:
         payload = asdict(self)

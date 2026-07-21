@@ -58,13 +58,17 @@ key is written below `.escrs_private/`. Both locations are ignored by Git.
 ```powershell
 .\.venv-escrs\Scripts\python.exe -m automation.escrs_formula_pilot inspect-ui `
   --profile automation/escrs_ui_profile.example.json `
+  --probe-lens-options `
   --keep-open
 ```
 
-This saves a visible-control manifest and screenshot without entering biometry.
-Copy the example profile to `automation/escrs_ui_profile.json`, update selectors
-from the manifest, verify result parsing against one manual test calculation,
-and only then change `"verified"` to `true`.
+This saves a visible-control manifest and screenshots without entering biometry.
+The optional probe only opens the public Gender, Manufacturer, and IOL menus;
+it selects a matching J&J manufacturer so the ZCB00 menu can be inspected, but
+does not press Calculate. Copy the example profile to
+`automation/escrs_ui_profile.json`, update selectors from the manifest, verify
+result parsing against one test calculation, and only then change `"verified"`
+to `true`.
 
 ## 3. Run the visible 10-eye pilot
 

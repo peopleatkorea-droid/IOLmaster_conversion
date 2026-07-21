@@ -8,70 +8,127 @@
   ],
   "static_values": {
     "surgeon": "Research",
-    "patient_name": "Anonymized"
+    "patient_name": "XX"
   },
+  "required_checked_checkbox_count": 7,
+  "ui_probes": [
+    {
+      "name": "gender",
+      "text_input_index": 4,
+      "context_patterns": ["^Gender$"]
+    },
+    {
+      "name": "manufacturer",
+      "text_input_index": 13,
+      "context_patterns": ["^Manufacturer$"],
+      "search_text": "Johnson",
+      "select_option_patterns": [
+        "^Johnson\\s+(?:and|&)\\s+Johnson(?: Vision)?$",
+        "Johnson\\s+(?:and|&)\\s+Johnson"
+      ]
+    },
+    {
+      "name": "iol_model",
+      "text_input_index": 14,
+      "context_patterns": ["^Select IOL$"],
+      "search_text": "ZCB00",
+      "requires_successful_probe": "manufacturer",
+      "select_option_patterns": ["\\bZCB00\\b"]
+    }
+  ],
   "field_order": [
     "surgeon",
     "patient_name",
     "patient_id",
     "gender",
-    "manufacturer",
-    "iol_model",
-    "k_index",
-    "target_refraction",
     "axial_length",
-    "k1",
-    "k2",
     "acd",
     "lens_thickness",
     "cct",
-    "wtw"
+    "wtw",
+    "k1",
+    "k2",
+    "target_refraction",
+    "manufacturer",
+    "iol_model"
   ],
   "fields": {
     "surgeon": {
-      "labels": ["Surgeon", "Surgeon name"]
+      "text_input_index": 0,
+      "context_patterns": ["^Surgeon$"]
     },
     "patient_name": {
-      "labels": ["Patient Name", "Patient name"]
+      "text_input_index": 1,
+      "context_patterns": ["^Patient Initials$"]
     },
     "patient_id": {
-      "labels": ["Patient Identifier", "Patient ID"]
+      "text_input_index": 2,
+      "context_patterns": ["^Id$"]
     },
     "gender": {
-      "labels": ["Gender", "Sex"]
+      "text_input_index": 4,
+      "context_patterns": ["^Gender$"],
+      "action": "mud_dropdown",
+      "option_patterns_by_value": {
+        "Male": ["^Male$"],
+        "Female": ["^Female$"]
+      }
     },
     "manufacturer": {
-      "labels": ["Manufacturer", "IOL Manufacturer"]
+      "text_input_index": 13,
+      "context_patterns": ["^Manufacturer$"],
+      "action": "mud_dropdown",
+      "search_text": "Johnson",
+      "option_patterns": [
+        "^Johnson\\s+(?:and|&)\\s+Johnson(?: Vision)?$",
+        "Johnson\\s+(?:and|&)\\s+Johnson"
+      ]
     },
     "iol_model": {
-      "labels": ["IOL", "IOL Model", "Lens"]
-    },
-    "k_index": {
-      "labels": ["K Index", "Keratometric Index"]
+      "text_input_index": 14,
+      "context_patterns": ["^Select IOL$"],
+      "action": "mud_dropdown",
+      "search_text": "ZCB00",
+      "option_patterns": ["\\bZCB00\\b"]
     },
     "target_refraction": {
-      "labels": ["Target Refraction", "Target Rx"]
+      "text_input_index": 12,
+      "context_patterns": ["^Target Refraction$"]
     },
     "axial_length": {
-      "labels": ["Axial Length", "AL"]
+      "text_input_index": 5,
+      "context_patterns": ["^(?:mm\\s+)?AL$"],
+      "context_occurrence": 0
     },
     "k1": {
-      "labels": ["K1", "K1 (Flat)"]
+      "text_input_index": 10,
+      "context_patterns": ["^(?:D\\s+)?K1$"],
+      "context_occurrence": 0
     },
     "k2": {
-      "labels": ["K2", "K2 (Steep)"]
+      "text_input_index": 11,
+      "context_patterns": ["^(?:D\\s+)?K2$"],
+      "context_occurrence": 0
     },
     "acd": {
-      "labels": ["Anterior Chamber Depth", "Optical ACD", "ACD"]
+      "text_input_index": 6,
+      "context_patterns": ["^(?:mm\\s+)?ACD$"],
+      "context_occurrence": 0
     },
     "lens_thickness": {
-      "labels": ["Lens Thickness", "LT"]
+      "text_input_index": 7,
+      "context_patterns": ["^(?:mm\\s+)?LT$"],
+      "context_occurrence": 0
     },
     "cct": {
-      "labels": ["Central Corneal Thickness", "CCT"]
+      "text_input_index": 8,
+      "context_patterns": ["^(?:µm\\s+)?CCT$"],
+      "context_occurrence": 0
     },
     "wtw": {
-      "labels": ["White-to-White", "Corneal Diameter", "WTW", "CD"]
+      "text_input_index": 9,
+      "context_patterns": ["^(?:mm\\s+)?WTW$"],
+      "context_occurrence": 0
     }
   },
   "calculate_button_names": [

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Immutable release version (for example v3.1.1)"
+        description: "Immutable release version (for example v3.2.0)"
         required: true
         type: string
       promote:
@@ -68,9 +68,9 @@ jobs:
           RELEASE_VERSION: ${{ steps.release.outputs.version }}
           RELEASE_PROMOTE: ${{ steps.release.outputs.promote }}
         run: |
-          $arguments = @("-Version", $env:RELEASE_VERSION)
-          if ($env:RELEASE_PROMOTE -eq "true") { $arguments += "-Promote" }
-          ./deployment/publish_r2.ps1 @arguments
+          $publishArguments = @{ Version = $env:RELEASE_VERSION }
+          if ($env:RELEASE_PROMOTE -eq "true") { $publishArguments.Promote = $true }
+          ./deployment/publish_r2.ps1 @publishArguments
 
       - name: Preserve release manifest
         uses: actions/upload-artifact@v4

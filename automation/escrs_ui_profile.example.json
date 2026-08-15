@@ -1,0 +1,145 @@
+{
+  "verified": false,
+  "url": "https://iolcalculator.escrs.org/",
+  "terms_accept_names": [
+    "Accept",
+    "I Agree",
+    "Agree"
+  ],
+  "static_values": {
+    "surgeon": "Research",
+    "patient_name": "XX"
+  },
+  "required_checked_checkbox_count": 7,
+  "ui_probes": [
+    {
+      "name": "gender",
+      "text_input_index": 4,
+      "context_patterns": ["^Gender$"]
+    },
+    {
+      "name": "manufacturer",
+      "text_input_index": 13,
+      "context_patterns": ["^Manufacturer$"],
+      "search_text": "Johnson",
+      "select_option_patterns": [
+        "^Johnson\\s+(?:and|&)\\s+Johnson(?: Vision)?$",
+        "Johnson\\s+(?:and|&)\\s+Johnson"
+      ]
+    },
+    {
+      "name": "iol_model",
+      "text_input_index": 14,
+      "context_patterns": ["^Select IOL$"],
+      "search_text": "ZCB00",
+      "requires_successful_probe": "manufacturer",
+      "select_option_patterns": ["\\bZCB00\\b"]
+    }
+  ],
+  "field_order": [
+    "surgeon",
+    "patient_name",
+    "patient_id",
+    "gender",
+    "axial_length",
+    "acd",
+    "lens_thickness",
+    "cct",
+    "wtw",
+    "k1",
+    "k2",
+    "target_refraction",
+    "manufacturer",
+    "iol_model"
+  ],
+  "fields": {
+    "surgeon": {
+      "text_input_index": 0,
+      "context_patterns": ["^Surgeon$"]
+    },
+    "patient_name": {
+      "text_input_index": 1,
+      "context_patterns": ["^Patient Initials$"]
+    },
+    "patient_id": {
+      "text_input_index": 2,
+      "context_patterns": ["^Id$"]
+    },
+    "gender": {
+      "text_input_index": 4,
+      "context_patterns": ["^Gender$"],
+      "action": "mud_dropdown",
+      "option_patterns_by_value": {
+        "Male": ["^Male$"],
+        "Female": ["^Female$"]
+      }
+    },
+    "manufacturer": {
+      "text_input_index": 13,
+      "context_patterns": ["^Manufacturer$"],
+      "action": "mud_dropdown",
+      "search_text": "Johnson",
+      "option_patterns": [
+        "^Johnson\\s+(?:and|&)\\s+Johnson(?: Vision)?$",
+        "Johnson\\s+(?:and|&)\\s+Johnson"
+      ]
+    },
+    "iol_model": {
+      "text_input_index": 14,
+      "context_patterns": ["^Select IOL$"],
+      "action": "mud_dropdown",
+      "search_text": "ZCB00",
+      "option_patterns": ["\\bZCB00\\b"]
+    },
+    "target_refraction": {
+      "text_input_index": 12,
+      "context_patterns": ["^Target Refraction$"]
+    },
+    "axial_length": {
+      "text_input_index": 5,
+      "context_patterns": ["^(?:mm\\s+)?AL$"],
+      "context_occurrence": 0
+    },
+    "k1": {
+      "text_input_index": 10,
+      "context_patterns": ["^(?:D\\s+)?K1$"],
+      "context_occurrence": 0
+    },
+    "k2": {
+      "text_input_index": 11,
+      "context_patterns": ["^(?:D\\s+)?K2$"],
+      "context_occurrence": 0
+    },
+    "acd": {
+      "text_input_index": 6,
+      "context_patterns": ["^(?:mm\\s+)?ACD$"],
+      "context_occurrence": 0
+    },
+    "lens_thickness": {
+      "text_input_index": 7,
+      "context_patterns": ["^(?:mm\\s+)?LT$"],
+      "context_occurrence": 0
+    },
+    "cct": {
+      "text_input_index": 8,
+      "context_patterns": ["^(?:µm\\s+)?CCT$"],
+      "context_occurrence": 0
+    },
+    "wtw": {
+      "text_input_index": 9,
+      "context_patterns": ["^(?:mm\\s+)?WTW$"],
+      "context_occurrence": 0
+    }
+  },
+  "calculate_button_names": [
+    "Calculate",
+    "Compute"
+  ],
+  "reset_button_names": [
+    "New Calculation",
+    "Reset",
+    "Clear"
+  ],
+  "minimum_result_formulas": 3,
+  "result_pair_pattern": "(?P<power>[+-]?\\d{1,2}(?:[.,]\\d{1,2})?)\\s*(?:D)?\\s+(?P<refraction>[+-]?\\d{1,2}(?:[.,]\\d{1,3})?)"
+}

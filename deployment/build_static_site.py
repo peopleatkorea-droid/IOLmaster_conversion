@@ -5,6 +5,9 @@ from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_FILES = (
+    ("LICENSE", "LICENSE"),
+    ("NOTICE", "NOTICE"),
+    ("CITATION.cff", "CITATION.cff"),
     ("web/index.html", "web/index.html"),
     ("web/styles.css", "web/styles.css"),
     ("web/app.js", "web/app.js"),

@@ -8,6 +8,7 @@ dist/
 __pycache__/
 *.py[cod]
 .venv/
+.venv-escrs/
 .env*.local
 .pytest_cache/
 .mypy_cache/
@@ -49,6 +50,8 @@ our_data_summary.json
 outputs/
 artifacts/
 analysis_outputs/
+.escrs_private/
+automation/escrs_ui_profile.json
 reports/figures/
 presentations/
 slides/

@@ -195,7 +195,7 @@ function loadExample(requestedIndex = null) {
     ? `${example.ageGroup} ${example.referenceCategory}${example.modelTier ? ` ${example.modelTier}` : ""} reference`
     : example.referenceCategory
       ? `${example.referenceCategory} reference`
-      : "Study case");
+      : "Synthetic educational example");
   exampleCaption.textContent = `${exampleType} ${example.caseId} · ${example.name} · ${exampleIndex + 1}/${BiometryOODExamples.examples.length}`;
   exampleCaption.hidden = false;
   validationMessage.textContent = "";

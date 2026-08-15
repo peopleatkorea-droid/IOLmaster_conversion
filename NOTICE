@@ -1,0 +1,18 @@
+Biometry OOD Explorer
+Copyright 2026 IOLmaster_conversion contributors
+
+Scientific creators:
+Woojin Sa and Jinho Jeong
+Department of Ophthalmology, Jeju National University Hospital,
+Jeju, Republic of Korea
+
+This distribution includes research software, synthetic demonstrations,
+validation summaries, and the published V3.2 model artifact, including
+deidentified calibration geometry arrays. It does not include raw clinical
+records, source clinical images, linkage maps, or direct patient identifiers.
+
+The software and model identify biometric configurations that are unusual
+relative to an internal single-center reference. They do not diagnose disease,
+select an intraocular lens formula, establish postoperative accuracy, or replace
+clinical judgment. The package is research and education software and has not
+been cleared or approved as a medical device.

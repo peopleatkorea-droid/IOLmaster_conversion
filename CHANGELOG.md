@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-08-15
+
+### Release metadata
+
+- Prepared the metadata-only `v3.2.1` packaging release; the frozen calculator model remains `continuous-age-bilateral-v3.2.0` with no numerical or algorithmic changes.
+- Added an Apache-2.0 license covering the repository's code and published model artifacts, a research-use notice, `CITATION.cff`, and Zenodo release metadata.
+- Added the license, notice, and citation metadata to the allowlisted public static bundle and its SHA-256 release manifest.
+- Added an explicit governance record that blocks the tag, stable promotion, and DOI deposit until institutional authorization for redistribution of the deidentified calibration geometry arrays is documented.
+- Added a release-governance preflight check that enforces the recorded release tag, approval authority, approval identifier, and approval date; only an explicit dry run may bypass pending fields.
+
+### Changed
+
+- Replaced every public web demo with a synthetic educational scenario that is not copied from patient, examination, or study-level records.
+- Updated the V3.2 deployment examples and public-bundle documentation to reference `biometry_ood_bilateral_v32.json` and the `v3.2.x` release line.
+
+### Validation
+
+- Added regression assertions for all 12 synthetic examples, including their model category and Overall OOD percentile.
+
 ## 2026-07-12
 
 ### Added

@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software or model, please cite the archived release."
+title: "Biometry OOD Explorer"
+type: software
+authors:
+  - family-names: "Sa"
+    given-names: "Woojin"
+    affiliation: "Department of Ophthalmology, Jeju National University Hospital"
+  - family-names: "Jeong"
+    given-names: "Jinho"
+    affiliation: "Department of Ophthalmology, Jeju National University Hospital"
+repository-code: "https://github.com/peopleatkorea-droid/IOLmaster_conversion"
+url: "https://k-era.org/tools/biometry-ood"
+version: "3.2.1"
+date-released: "2026-08-15"
+license: "Apache-2.0"
+keywords:
+  - "ocular biometry"
+  - "intraocular lens"
+  - "out-of-distribution detection"
+  - "Mahalanobis distance"
+  - "clinical research software"

@@ -38,6 +38,12 @@ def validate_governance(version, record_text, allow_pending=False):
         if not value or "PENDING" in value.upper():
             errors.append(f"GOVERNANCE.md `{label}` is still pending.")
 
+    zenodo = re.search(
+        r"^- Zenodo GitHub integration:\s*(.+?)\s*$", record_text, re.M
+    )
+    if not zenodo or not zenodo.group(1).strip().lower().startswith("enabled"):
+        errors.append("GOVERNANCE.md must record Zenodo GitHub integration as enabled.")
+
     if errors and allow_pending:
         return []
     return errors

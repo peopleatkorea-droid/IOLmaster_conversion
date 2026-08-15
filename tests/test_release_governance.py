@@ -11,6 +11,7 @@ APPROVED_RECORD = """# Public model-release governance record
 - Approval authority: Example institutional office
 - Approval identifier: TEST-APPROVAL-001
 - Approval date: 2026-08-15
+- Zenodo GitHub integration: Enabled for test fixture
 """
 
 
@@ -29,6 +30,13 @@ class ReleaseGovernanceTests(unittest.TestCase):
     def test_mismatched_release_blocks_release(self):
         errors = validate_governance("v3.2.2", APPROVED_RECORD)
         self.assertTrue(any("biometry-ood-v3.2.2" in error for error in errors))
+
+    def test_missing_zenodo_integration_blocks_release(self):
+        disabled = APPROVED_RECORD.replace(
+            "Enabled for test fixture", "Not enabled"
+        )
+        errors = validate_governance("v3.2.1", disabled)
+        self.assertTrue(any("Zenodo" in error for error in errors))
 
     def test_legacy_release_remains_reproducible(self):
         self.assertEqual(validate_governance("v3.2.0", ""), [])

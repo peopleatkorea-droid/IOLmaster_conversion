@@ -13,11 +13,16 @@ calibration geometry arrays.
   parameters, and deidentified calibration geometry arrays
 - Excluded: raw clinical records, source images, linkage maps, direct
   identifiers, and row-level source biometry
-- Approval authority: PENDING AUTHOR CONFIRMATION
-- Approval identifier: PENDING AUTHOR CONFIRMATION
-- Approval date: PENDING AUTHOR CONFIRMATION
+- Approval authority: Jeju National University Hospital Institutional Review Board
+- Approval identifier: JNUH 2026-06-028-003
+- Approval date: 2026-07-14
+- Approved research period: 2026-08 through 2027-07
+- Informed consent: Waived
+- Zenodo GitHub integration: Enabled; confirmed by the corresponding author on 2026-08-15
 
-The tag, GitHub Release, public stable promotion, and DOI-backed archival
-deposit must not be created until the three approval fields above are completed
-from an institutional record. This record documents authorization; it does not
-substitute for IRB, privacy, data-governance, or institutional review.
+The corresponding author confirmed that this approval covers external
+redistribution of the deidentified calibration geometry arrays within the scope
+above. The repository's Zenodo integration was confirmed before creation of the
+tag and GitHub Release so that the release can receive a DOI-backed archival
+deposit. This record documents authorization; it does not expand the approved
+scope or substitute for continuing IRB, privacy, or institutional oversight.

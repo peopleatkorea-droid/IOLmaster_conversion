@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-15
+
+### Changed
+
+- Replaced every public web demo with a synthetic educational scenario that is not copied from patient, examination, or study-level records.
+- Updated the V3.2 deployment examples and public-bundle documentation to reference `biometry_ood_bilateral_v32.json` and the `v3.2.x` release line.
+
+### Validation
+
+- Added regression assertions for all 12 synthetic examples, including their model category and Overall OOD percentile.
+
 ## 2026-07-12
 
 ### Added

@@ -94,36 +94,27 @@ assert.strictEqual(core.tailExpandedPosition(100), 100);
 assert.strictEqual(core.tailExpandedPosition(-10), 0);
 assert.strictEqual(core.tailExpandedPosition(120), 100);
 
-assert.strictEqual(demoExamples.examples.length, 22);
-const expectedStudyCases = {
-  S038: ["Rare anatomy", 97.621],
-  S040: ["Typical anatomy", 4.951],
-  P071: ["Typical anatomy", 85.867],
-  P111: ["Typical anatomy", 89.932],
-  P070: ["Uncommon anatomy", 93.382],
-  P091: ["Typical anatomy", 87.271],
-  P082: ["Typical anatomy", 79.676],
-  D1: ["Uncommon anatomy", 95.725],
-  U1: ["Uncommon anatomy", 91.500],
-  U2: ["Uncommon anatomy", 93.975],
-  U3: ["Uncommon anatomy", 96.499],
-  R1: ["Rare anatomy", 97.804],
-  R2: ["Rare anatomy", 98.802],
-  R3: ["Rare anatomy", 99.639],
-  PT: ["Typical anatomy", 50.180],
-  PU: ["Uncommon anatomy", 93.255],
-  PR: ["Rare anatomy", 97.788],
-  YT: ["Typical anatomy", 47.197],
-  YU: ["Uncommon anatomy", 93.812],
-  YR: ["Rare anatomy", 97.917],
-  EA1: ["Uncommon anatomy", 93.330],
-  EA2: ["Uncommon anatomy", 91.721],
+assert.strictEqual(demoExamples.examples.length, 12);
+const expectedSyntheticCases = {
+  "SYN-A-T1": ["Typical anatomy", 0.748],
+  "SYN-A-T2": ["Typical anatomy", 0.251],
+  "SYN-A-U1": ["Uncommon anatomy", 94.998],
+  "SYN-A-U2": ["Uncommon anatomy", 92.038],
+  "SYN-A-R1": ["Rare anatomy", 98.801],
+  "SYN-A-R2": ["Rare anatomy", 99.627],
+  "SYN-P-T": ["Typical anatomy", 5.555],
+  "SYN-P-U": ["Uncommon anatomy", 91.042],
+  "SYN-P-R": ["Rare anatomy", 97.736],
+  "SYN-Y-T": ["Typical anatomy", 3.995],
+  "SYN-Y-U": ["Uncommon anatomy", 93.663],
+  "SYN-Y-R": ["Uncommon anatomy", 97.268],
 };
 demoExamples.examples.forEach((example) => {
   const exampleResult = core.calculate(model, example);
-  const [expectedStatus, expectedPercentile] = expectedStudyCases[example.caseId];
+  const [expectedStatus, expectedPercentile] = expectedSyntheticCases[example.caseId];
   assert.strictEqual(exampleResult.status, expectedStatus);
   assert(Math.abs(exampleResult.percentile - expectedPercentile) < 0.001);
+  assert.strictEqual(example.exampleType, "Synthetic educational example");
 });
 for (const ageGroup of ["Pediatric", "Young adult"]) {
   const ageExamples = demoExamples.examples.filter((example) => example.ageGroup === ageGroup);

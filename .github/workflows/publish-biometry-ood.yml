@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Immutable release version (for example v3.1.1)"
+        description: "Immutable release version (for example v3.2.0)"
         required: true
         type: string
       promote:

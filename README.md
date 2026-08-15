@@ -281,6 +281,8 @@ http://127.0.0.1:8765/web/
 
 웹 버전은 Age, AL, Mean K, ACD, LT를 서버에 전송하지 않고 브라우저 안에서 계산합니다. 환자 이름, 등록번호, 생년월일 및 검사일 입력란은 없습니다. 실제 외부 배포 시에도 접속 로그나 분석 도구가 입력값을 수집하지 않도록 유지해야 합니다.
 
+`web/demo-examples.js`의 무작위 예시는 실제 환자·검사·연구 레코드에서 복사하지 않은 합성 교육 사례만 사용합니다.
+
 화면에는 다음 정보를 상시 표시합니다.
 
 - 모든 계산이 브라우저 안에서 수행되고 입력 biometry가 앱에 의해 전송·저장되지 않는다는 안내
@@ -314,10 +316,10 @@ K-ERA 홈페이지의 고정 주소 `/tools/biometry-ood`는 저장소 파일을
 웹 화면·계산 로직·공개 모델을 수정한 뒤에는 Codex에 다음 한 줄로 요청합니다.
 
 ```text
-오늘 변경 commit/push하고, 웹 배포도 v3.1.1로 진행해줘.
+오늘 변경 commit/push하고, 웹 배포도 v3.2.0으로 진행해줘.
 ```
 
-Codex는 변경 파일과 테스트를 확인한 뒤 commit/push하고, `biometry-ood-v3.1.1` 태그를 push해 GitHub Actions 배포를 시작합니다. 다음 배포에서는 `v3.1.2`, `v3.1.3`처럼 사용하지 않은 새 patch version으로 올립니다.
+Codex는 변경 파일과 테스트를 확인한 뒤 commit/push하고, `biometry-ood-v3.2.0` 태그를 push해 GitHub Actions 배포를 시작합니다. 다음 배포에서는 `v3.2.1`, `v3.2.2`처럼 사용하지 않은 새 patch version으로 올립니다.
 
 README, 연구 스크립트 또는 테스트만 수정했고 공개 웹 bundle이 바뀌지 않았다면 다음처럼 요청합니다.
 
@@ -330,11 +332,11 @@ README, 연구 스크립트 또는 테스트만 수정했고 공개 웹 bundle�
 ```powershell
 git add -A
 git commit -m "Update Biometry OOD Explorer"
-git tag biometry-ood-v3.1.1
-git push origin master biometry-ood-v3.1.1
+git tag biometry-ood-v3.2.0
+git push origin master biometry-ood-v3.2.0
 ```
 
-배포 태그가 필요한 공개 bundle source는 `web/index.html`, `web/styles.css`, `web/app.js`, `web/ood-core.js`, `web/demo-examples.js`, `models/biometry_ood_bilateral_v31.json`입니다. 단순 commit/push는 실서비스를 변경하지 않으며, 새 `biometry-ood-v*` 태그를 push할 때만 자동 배포·검증·stable 전환이 실행됩니다.
+배포 태그가 필요한 공개 bundle source는 `web/index.html`, `web/styles.css`, `web/app.js`, `web/ood-core.js`, `web/demo-examples.js`, `models/biometry_ood_bilateral_v32.json`입니다. 단순 commit/push는 실서비스를 변경하지 않으며, 새 `biometry-ood-v*` 태그를 push할 때만 자동 배포·검증·stable 전환이 실행됩니다.
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File deployment\publish_r2.ps1 `

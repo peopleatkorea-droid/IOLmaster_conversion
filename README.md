@@ -305,7 +305,13 @@ build_web_static.bat
 py -3 deployment\build_static_site.py
 ```
 
-배포 대상은 `dist\web-static` 폴더 하나뿐입니다. 허용된 파일은 `web/index.html`, `web/styles.css`, `web/app.js`, `web/ood-core.js`, `web/demo-examples.js`, `models/biometry_ood_bilateral_v32.json`과 루트 이동용 `index.html`입니다. 출력 폴더에 그 밖의 파일이 있으면 빌드를 중단하므로 원본 Excel/PDF, Python source, 검증 보고서와 발표 산출물이 섞이지 않습니다.
+배포 대상은 `dist\web-static` 폴더 하나뿐입니다. 허용된 파일은 `web/index.html`, `web/styles.css`, `web/app.js`, `web/ood-core.js`, `web/demo-examples.js`, `models/biometry_ood_bilateral_v32.json`, `LICENSE`, `NOTICE`, `CITATION.cff`와 루트 이동용 `index.html`입니다. 출력 폴더에 그 밖의 파일이 있으면 빌드를 중단하므로 원본 Excel/PDF, Python source, 검증 보고서와 발표 산출물이 섞이지 않습니다.
+
+### 라이선스와 인용
+
+저장소의 source code, 공개 model artifact, validation summary, synthetic demo는 [`Apache License 2.0`](LICENSE)으로 배포합니다. 원본 임상자료, source image, linkage map, direct identifier, row-level source biometry는 저장소에 포함되지 않으며 이 라이선스의 배포 대상도 아닙니다. 연구용 한계와 비의료기기 고지는 [`NOTICE`](NOTICE)에, 인용용 저자·버전 정보는 [`CITATION.cff`](CITATION.cff)에 기록합니다.
+
+DOI 발급용 GitHub-Zenodo metadata는 [`.zenodo.json`](.zenodo.json)에 보존합니다. `v3.2.1`은 라이선스·인용·archive metadata를 추가하는 packaging release이며, 계산기의 frozen model bundle은 `continuous-age-bilateral-v3.2.0`으로 유지되고 수치나 알고리즘은 바뀌지 않습니다. 새 tag, stable promotion, GitHub Release, DOI deposit 전에는 [`GOVERNANCE.md`](GOVERNANCE.md)의 기관승인 기록을 완료해야 합니다. 배포 스크립트는 이 기록의 release tag, 승인 주체, 승인 식별자, 승인 일자를 자동 검사하며, pending 기록은 dry-run에서만 명시적으로 허용합니다.
 
 ### K-ERA R2 버전 배포
 

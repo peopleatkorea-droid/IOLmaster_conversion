@@ -13,6 +13,7 @@ param(
   [switch]$Promote,
   [switch]$SkipTests,
   [switch]$AllowDirtySource,
+  [switch]$AllowPendingGovernance,
   [switch]$DryRun
 )
 
@@ -65,8 +66,12 @@ function Assert-PathInside([string]$Parent, [string]$Child) {
 function Resolve-PythonExecutable {
   $venvPython = Join-Path $RepositoryRoot ".venv\Scripts\python.exe"
   if (Test-Path -LiteralPath $venvPython -PathType Leaf) { return $venvPython }
-  $python = Get-Command python -ErrorAction SilentlyContinue
-  if ($python) { return $python.Source }
+  foreach ($commandName in @("python", "py")) {
+    $candidate = Get-Command $commandName -ErrorAction SilentlyContinue
+    if (-not $candidate) { continue }
+    & $candidate.Source -c "import sys" *> $null
+    if ($LASTEXITCODE -eq 0) { return $candidate.Source }
+  }
   throw "Python was not found. Install Python or create .venv before publishing."
 }
 
@@ -238,9 +243,23 @@ Require-Value "R2_PUBLIC_BASE_URL" $PublicBaseUrl
 Require-Value "R2_BIOMETRY_OOD_PREFIX/Prefix" $Prefix
 
 $python = Resolve-PythonExecutable
+if ($AllowPendingGovernance -and -not $DryRun) {
+  throw "-AllowPendingGovernance is permitted only with -DryRun."
+}
+$governanceArguments = @(
+  (Join-Path $RepositoryRoot "deployment\check_release_governance.py"),
+  "--version",
+  $Version
+)
+if ($AllowPendingGovernance) { $governanceArguments += "--allow-pending" }
+& $python @governanceArguments
+if ($LASTEXITCODE -ne 0) {
+  throw "Institutional release authorization is not complete for $Version."
+}
+
 if (-not $SkipTests) {
   Write-Host "Running Python deployment and model tests..."
-  foreach ($testPattern in @("test_biometry_ood.py", "test_static_deployment.py")) {
+  foreach ($testPattern in @("test_biometry_ood.py", "test_release_governance.py", "test_static_deployment.py")) {
     & $python -m unittest discover -s (Join-Path $RepositoryRoot "tests") -p $testPattern
     if ($LASTEXITCODE -ne 0) { throw "Python test failed: $testPattern" }
   }

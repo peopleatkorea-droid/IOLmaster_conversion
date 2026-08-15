@@ -1,0 +1,34 @@
+{
+  "title": "Biometry OOD Explorer",
+  "description": "Versioned research software and a frozen model artifact for age-conditioned joint-biometry atypicality. The package includes browser-only calculation code, synthetic demonstrations, validation summaries, and deidentified calibration geometry arrays. It does not select an intraocular lens formula or establish postoperative accuracy and is not a medical device.",
+  "creators": [
+    {
+      "name": "Sa, Woojin",
+      "affiliation": "Department of Ophthalmology, Jeju National University Hospital"
+    },
+    {
+      "name": "Jeong, Jinho",
+      "affiliation": "Department of Ophthalmology, Jeju National University Hospital"
+    }
+  ],
+  "license": "Apache-2.0",
+  "keywords": [
+    "ocular biometry",
+    "intraocular lens",
+    "out-of-distribution detection",
+    "Mahalanobis distance",
+    "clinical research software"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/peopleatkorea-droid/IOLmaster_conversion",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://k-era.org/tools/biometry-ood",
+      "relation": "isAlternateIdentifier",
+      "scheme": "url"
+    }
+  ]
+}

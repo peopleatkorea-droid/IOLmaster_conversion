@@ -8,6 +8,9 @@ from pathlib import Path
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 BUILD_SCRIPT = REPOSITORY_ROOT / "deployment" / "build_static_site.py"
 EXPECTED_FILES = {
+    "CITATION.cff",
+    "LICENSE",
+    "NOTICE",
     "index.html",
     "models/biometry_ood_bilateral_v32.json",
     "web/app.js",
@@ -41,6 +44,13 @@ class StaticDeploymentTests(unittest.TestCase):
             self.assertIn("Research and education use only", html)
             self.assertIn("Internal untouched test cohort", html)
             self.assertNotIn("<form action=", html)
+            self.assertIn('../LICENSE', html)
+            self.assertIn('../NOTICE', html)
+            self.assertIn('../CITATION.cff', html)
+
+            self.assertIn("Apache License", (output / "LICENSE").read_text(encoding="utf-8"))
+            self.assertIn("research and education software", (output / "NOTICE").read_text(encoding="utf-8"))
+            self.assertIn("cff-version: 1.2.0", (output / "CITATION.cff").read_text(encoding="utf-8"))
 
     def test_build_refuses_unexpected_output_file(self):
         with tempfile.TemporaryDirectory() as temporary_directory:

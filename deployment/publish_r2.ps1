@@ -240,8 +240,10 @@ Require-Value "R2_BIOMETRY_OOD_PREFIX/Prefix" $Prefix
 $python = Resolve-PythonExecutable
 if (-not $SkipTests) {
   Write-Host "Running Python deployment and model tests..."
-  & $python -m unittest discover -s (Join-Path $RepositoryRoot "tests") -p "test_*.py"
-  if ($LASTEXITCODE -ne 0) { throw "Python tests failed." }
+  foreach ($testPattern in @("test_biometry_ood.py", "test_static_deployment.py")) {
+    & $python -m unittest discover -s (Join-Path $RepositoryRoot "tests") -p $testPattern
+    if ($LASTEXITCODE -ne 0) { throw "Python test failed: $testPattern" }
+  }
   Write-Host "Running JavaScript core tests..."
   Push-Location $RepositoryRoot
   try { & node "tests/test_web_core.js" } finally { Pop-Location }

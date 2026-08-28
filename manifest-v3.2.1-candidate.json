@@ -1,0 +1,60 @@
+{
+    "schema_version":  1,
+    "version":  "v3.2.1",
+    "model_bundle_version":  "continuous-age-bilateral-v3.2.0",
+    "built_at_utc":  "2026-08-15T02:24:15.3282337Z",
+    "source_commit":  "ba68073719cb61daac32e47d478c55979b8dc9e3",
+    "source_worktree_dirty":  false,
+    "files":  [
+                  {
+                      "path":  "CITATION.cff",
+                      "bytes":  759,
+                      "sha256":  "6ca9bf09859da509a93c0259be3e2eb6ffa47edf9fa38cc69d1c33c5ed3406e5"
+                  },
+                  {
+                      "path":  "index.html",
+                      "bytes":  313,
+                      "sha256":  "8acfbab7e610850374378b867db3ade008304ade57989d86a803cf168f45c48d"
+                  },
+                  {
+                      "path":  "LICENSE",
+                      "bytes":  11357,
+                      "sha256":  "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+                  },
+                  {
+                      "path":  "models/biometry_ood_bilateral_v32.json",
+                      "bytes":  1105073,
+                      "sha256":  "94923993dd0d84a43ea7b3544a4003775a20c57cdb34062e26fc0e6558c8ce67"
+                  },
+                  {
+                      "path":  "NOTICE",
+                      "bytes":  863,
+                      "sha256":  "985d8b11fe0495ebda0802c339e62388560c6f509b4d21d3d97f0cd635a0030a"
+                  },
+                  {
+                      "path":  "web/app.js",
+                      "bytes":  13289,
+                      "sha256":  "83b9e619c7e0d511da2be3fdb0d6f87f991d58114c25574d5586c4cb8f2e4429"
+                  },
+                  {
+                      "path":  "web/demo-examples.js",
+                      "bytes":  5118,
+                      "sha256":  "07f5fa3b66ec6eebad656ddefb82af74d88c842f3b561655691f13dacf4f34b0"
+                  },
+                  {
+                      "path":  "web/index.html",
+                      "bytes":  12292,
+                      "sha256":  "6444a277a019ce43a36dfe448788784efd9f60e9177711e28516378af574e7a4"
+                  },
+                  {
+                      "path":  "web/ood-core.js",
+                      "bytes":  18131,
+                      "sha256":  "af298f43dfaac6403725eed52fb3dc6e880edf0476804d7cae63797db423165d"
+                  },
+                  {
+                      "path":  "web/styles.css",
+                      "bytes":  18548,
+                      "sha256":  "58eb0659bb6fa0dda49cf3150fbb99d9f73d7fc10cbad12b54f95d25cc5b6296"
+                  }
+              ]
+}

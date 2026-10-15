@@ -21,5 +21,6 @@ Owner directive (2026-10-15): the PR authoring agent decides from the complete f
 
 ### Keep execution policy
 
-- Preserve the owner's manual-only GitHub Actions policy. Do not add automatic PR/push/schedule triggers or dispatch hosted workflows without an explicit hosted-run request. This review decision runs in the authoring agent, not a new Action.
+- Keep PR review classification in the authoring agent, not a GitHub Action. Do not add automatic PR/push/schedule triggers or dispatch hosted workflows without an explicit hosted-run request.
+- The existing `.github/workflows/publish-biometry-ood.yml` release trigger for `biometry-ood-v*` tags is outside this PR-review policy change. Preserve that documented release path; do not remove, broaden, or invoke it while applying these review rules. Normal PR review work remains manual with respect to Actions.
 - Keep existing local verification, security scans, dependency audits, branch protections, and independent security-review settings. This policy changes Code Review invocation, not those controls.
